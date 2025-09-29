@@ -1,0 +1,72 @@
+﻿@model List<BorrowRecord>
+@{
+    ViewData["Title"] = "Danh sách phiếu mượn";
+    var currentUser = ViewBag.CurrentUser as User;
+}
+
+<div class="container mt-4">
+    <h2>Danh sách phiếu mượn</h2>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.Error
+        </div>
+    }
+
+    @if (ViewBag.Success != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @ViewBag.Success
+        </div>
+    }
+
+    @if (currentUser != null &&
+        (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN" || currentUser.Role == "MEMBER"))
+    {
+        <a asp-action="Add" class="btn btn-primary mb-3">Thêm phiếu mượn</a>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Người mượn</th>
+                <th>Mã người dùng</th>
+                <th>Sách</th>
+                <th>Mã sách</th>
+                <th>Ngày mượn</th>
+                <th>Hạn trả</th>
+                <th>Ngày trả</th>
+                <th>Trạng thái</th>
+                <th>Tiền phạt</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in Model)
+            {
+                <tr>
+                    <td>@record.RecordId</td>
+                    <td>@record.User.FullName</td>
+                    <td>@record.UserCode</td>
+                    <td>@record.Book.Title</td>
+                    <td>@record.BookCode</td>
+                    <td>@record.BorrowDate.ToString("yyyy-MM-dd")</td>
+                    <td>@record.DueDate.ToString("yyyy-MM-dd")</td>
+                    <td>@(record.ReturnDate?.ToString("yyyy-MM-dd") ?? "")</td>
+                    <td>@record.Status</td>
+                    <td>@record.FineAmount</td>
+                    <td>
+                        @if (currentUser != null && (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@record.RecordId" class="btn btn-sm btn-warning">Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@record.RecordId" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

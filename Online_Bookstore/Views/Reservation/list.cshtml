@@ -1,0 +1,66 @@
+﻿@model IEnumerable<Online_Bookstore.Models.Reservation>
+@{
+    ViewBag.Title = "Danh sách đặt trước";
+    var currentUser = ViewBag.CurrentUser as Online_Bookstore.Models.User;
+}
+
+<div class="container mt-4">
+    <h2>@ViewBag.Title</h2>
+
+    @if (!string.IsNullOrEmpty(ViewBag.Error))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.Error
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewBag.Success))
+    {
+        <div class="alert alert-success" role="alert">
+            @ViewBag.Success
+        </div>
+    }
+
+    @if (currentUser != null && (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN" || currentUser.Role == "MEMBER"))
+    {
+        <a asp-action="Add" asp-controller="Reservations" class="btn btn-primary mb-3">Thêm đặt trước</a>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Người đặt</th>
+                <th>Mã người dùng</th>
+                <th>Sách</th>
+                <th>Mã sách</th>
+                <th>Ngày đặt</th>
+                <th>Hạn hết</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reservation in Model)
+            {
+                <tr>
+                    <td>@reservation.ReservationId</td>
+                    <td>@reservation.User.UserName</td>
+                    <td>@reservation.UserCode</td>
+                    <td>@reservation.Book.Title</td>
+                    <td>@reservation.BookCode</td>
+                    <td>@reservation.ReservationDate.ToString("yyyy-MM-dd")</td>
+                    <td>@reservation.ExpiryDate?.ToString("yyyy-MM-dd")</td>
+                    <td>@reservation.Status</td>
+                    <td>
+                        @if (currentUser != null && (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@reservation.ReservationId" class="btn btn-sm btn-warning">Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@reservation.ReservationId" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

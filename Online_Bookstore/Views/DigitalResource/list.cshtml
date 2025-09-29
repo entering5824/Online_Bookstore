@@ -1,0 +1,68 @@
+﻿@model IEnumerable<Online_Bookstore.Models.DigitalResource>
+@{
+    ViewData["Title"] = "Danh sách tài nguyên số";
+}
+
+<div class="container mt-4">
+    <h2>Danh sách tài nguyên số</h2>
+
+    @if (!string.IsNullOrEmpty(ViewBag.Error))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.Error
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewBag.Success))
+    {
+        <div class="alert alert-success" role="alert">
+            @ViewBag.Success
+        </div>
+    }
+
+    @if (User.IsInRole("ADMIN") || User.IsInRole("LIBRARIAN"))
+    {
+        <a asp-action="Add" class="btn btn-primary mb-3">Thêm tài nguyên số</a>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Sách</th>
+                <th>Mã sách</th>
+                <th>Tiêu đề</th>
+                <th>Định dạng</th>
+                <th>Kích thước</th>
+                <th>URL</th>
+                <th>Ngày tải lên</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var resource in Model)
+            {
+                <tr>
+                    <td>@resource.ResourceId</td>
+                    <td>@resource.Book.Title</td>
+                    <td>@resource.BookCode</td>
+                    <td>@resource.Title</td>
+                    <td>@resource.Format</td>
+                    <td>@resource.FileSize</td>
+                    <td>@resource.FileUrl</td>
+                    <td>@resource.UploadDate.ToString("yyyy-MM-dd")</td>
+                    <td>@resource.Status</td>
+                    <td>
+                        @if (User.IsInRole("ADMIN") || User.IsInRole("LIBRARIAN"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@resource.ResourceId" class="btn btn-sm btn-warning">Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@resource.ResourceId" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

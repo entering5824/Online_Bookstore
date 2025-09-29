@@ -1,0 +1,43 @@
+﻿@model IEnumerable<Online_Bookstore.Models.BookCategory>
+@{
+    ViewData["Title"] = "Danh sách danh mục sách";
+}
+
+<div class="container mt-4">
+    <h2>Danh sách danh mục sách</h2>
+
+    @* Chỉ hiện nút Thêm thể loại nếu là ADMIN hoặc LIBRARIAN *@
+    @if (User.IsInRole("ADMIN") || User.IsInRole("LIBRARIAN"))
+    {
+        <a asp-action="Add" class="btn btn-success btn-sm mb-2">Thêm danh mục</a>
+    }
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên danh mục</th>
+                <th>Mô tả</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in Model)
+            {
+                <tr>
+                    <td>@category.CategoryId</td>
+                    <td>@category.CategoryName</td>
+                    <td>@category.Description</td>
+                    <td>
+                        @* Chỉ hiện nút Sửa, Xóa nếu là ADMIN hoặc LIBRARIAN *@
+                        @if (User.IsInRole("ADMIN") || User.IsInRole("LIBRARIAN"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@category.CategoryId" class="btn btn-warning btn-sm">Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@category.CategoryId" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận xóa?')">Xóa</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

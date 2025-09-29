@@ -1,0 +1,88 @@
+﻿<!-- Modal đăng nhập -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs-listing">
+                    <nav>
+                        <div class="nav nav-tabs d-flex justify-content-center" id="nav-tab" role="tablist">
+                            <button class="nav-link text-capitalize active" id="nav-sign-in-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-sign-in" type="button" role="tab" aria-controls="nav-sign-in"
+                                    aria-selected="true">
+                                Đăng nhập
+                            </button>
+                            <button class="nav-link text-capitalize" id="nav-register-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-register" type="button" role="tab" aria-controls="nav-register"
+                                    aria-selected="false">
+                                Đăng ký
+                            </button>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade active show" id="nav-sign-in" role="tabpanel"
+                             aria-labelledby="nav-sign-in-tab">
+                            <form asp-action="Login" asp-controller="Account" method="post">
+                                <div class="form-group py-3">
+                                    <label class="mb-2" for="sign-in">Tên đăng nhập hoặc email *</label>
+                                    <input type="text" minlength="2" name="username" placeholder="Tên đăng nhập hoặc email"
+                                           class="form-control w-100 rounded-3 p-3" required>
+                                </div>
+                                <div class="form-group pb-3">
+                                    <label class="mb-2" for="sign-in">Mật khẩu *</label>
+                                    <input type="password" minlength="2" name="password" placeholder="Mật khẩu"
+                                           class="form-control w-100 rounded-3 p-3" required>
+                                </div>
+                                <label class="py-3">
+                                    <input type="checkbox" class="d-inline">
+                                    <span class="label-body">Ghi nhớ đăng nhập</span>
+                                    <span class="label-body">
+                                        <a asp-action="ForgotPassword" asp-controller="Account" class="fw-bold">Quên mật khẩu?</a>
+                                    </span>
+                                </label>
+                                <button type="submit" class="btn btn-dark w-100 my-3">Đăng nhập</button>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="nav-register" role="tabpanel"
+                             aria-labelledby="nav-register-tab">
+                            <form asp-action="Register" asp-controller="Account" method="post">
+                                <div class="form-group py-3">
+                                    <label class="mb-2" for="register">Họ tên *</label>
+                                    <input type="text" minlength="2" name="fullName" placeholder="Họ tên"
+                                           class="form-control w-100 rounded-3 p-3" required>
+                                </div>
+                                <div class="form-group py-3">
+                                    <label class="mb-2" for="register">Email *</label>
+                                    <input type="email" minlength="2" name="email" placeholder="Email"
+                                           class="form-control w-100 rounded-3 p-3" required>
+                                </div>
+                                <div class="form-group py-3">
+                                    <label class="mb-2" for="register">Tên đăng nhập *</label>
+                                    <input type="text" minlength="2" name="username" placeholder="Tên đăng nhập"
+                                           class="form-control w-100 rounded-3 p-3" required>
+                                </div>
+                                <div class="form-group pb-3">
+                                    <label class="mb-2" for="sign-in">Mật khẩu *</label>
+                                    <input type="password" minlength="2" name="password" placeholder="Mật khẩu"
+                                           class="form-control w-100 rounded-3 p-3" required>
+                                </div>
+                                <div class="form-group pb-3">
+                                    <label class="mb-2" for="sign-in">Nhập lại mật khẩu *</label>
+                                    <input type="password" minlength="2" name="confirmPassword" placeholder="Nhập lại mật khẩu"
+                                           class="form-control w-100 rounded-3 p-3" required>
+                                </div>
+                                <label class="py-3">
+                                    <input type="checkbox" required class="d-inline">
+                                    <span class="label-body">Tôi đồng ý với <a href="#" class="fw-bold">Điều khoản sử dụng</a></span>
+                                </label>
+                                <button type="submit" class="btn btn-dark w-100 my-3">Đăng ký</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

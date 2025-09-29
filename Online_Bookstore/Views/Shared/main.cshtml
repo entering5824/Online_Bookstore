@@ -1,0 +1,18 @@
+﻿@* main.cshtml *@
+@{
+    Layout = null; // Nếu muốn tự quản lý header/footer
+}
+
+@Html.Partial("Layout/Header")   @* tương đương header.jsp *@
+
+@* Hiển thị nội dung động *@
+@{
+    var contentView = ViewBag.Content as string; // tương đương ${content}
+}
+@if (!string.IsNullOrEmpty(contentView))
+{
+    @Html.Partial(contentView)
+}
+
+@Html.Partial("Layout/Modal")    @* tương đương modal.jsp *@
+@Html.Partial("Layout/Footer")   @* tương đương footer.jsp *@

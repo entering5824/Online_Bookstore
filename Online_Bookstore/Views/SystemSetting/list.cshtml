@@ -1,0 +1,39 @@
+﻿@{
+    ViewBag.Title = "Cài đặt hệ thống";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>@ViewBag.Title</title>
+    <style>
+        .darkmode-toggle-btn {
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+            .darkmode-toggle-btn svg {
+                vertical-align: middle;
+            }
+    </style>
+    <link rel="stylesheet" type="text/css" href="~/style.css" />
+</head>
+<body>
+    <div class="container mt-4 text-center">
+        <h2>@ViewBag.Title</h2>
+        <button id="toggle-darkmode" class="darkmode-toggle-btn">
+            <svg id="icon-darkmode" width="32" height="32" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
+                <path id="moon-path" d="M16 12 A4 4 0 1 1 8 12 A4 4 0 1 1 16 12 Z" fill="currentColor" />
+            </svg>
+            <span id="darkmode-label">Chuyển đổi Dark/Light Mode</span>
+        </button>
+    </div>
+    <script src="~/js/script.js"></script>
+</body>
+</html>

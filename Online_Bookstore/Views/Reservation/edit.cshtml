@@ -1,0 +1,56 @@
+﻿@model Online_Bookstore.Models.Reservation
+@{
+    ViewBag.Title = "Sửa đặt trước";
+}
+
+<div class="container mt-4">
+    <h2>@ViewBag.Title</h2>
+
+    @if (!string.IsNullOrEmpty(ViewBag.Error))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.Error
+        </div>
+    }
+
+    <form asp-action="Edit" asp-controller="Reservations" method="post">
+        <input type="hidden" asp-for="ReservationId" />
+
+        <div class="form-group">
+            <label>Sách</label>
+            <select asp-for="BookId" class="form-control" required>
+                @foreach (var book in Model.Books)
+                {
+                    <option value="@book.BookId" @(book.BookId == Model.BookId ? "selected" : "")>
+                        @(string.IsNullOrEmpty(book.Title) ? "Không rõ tên sách" : book.Title)
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Người đặt</label>
+            <select asp-for="UserId" class="form-control" required>
+                @foreach (var user in Model.Users)
+                {
+                    <option value="@user.UserId" @(user.UserId == Model.UserId ? "selected" : "")>
+                        @(string.IsNullOrEmpty(user.FullName) ? "Không rõ tên" : user.FullName) (@(string.IsNullOrEmpty(user.UserCode) ? "---" : user.UserCode))
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Trạng thái</label>
+            <select asp-for="Status" class="form-control">
+                <option value="pending" @(Model.Status == "pending" ? "selected" : "")>Chờ xử lý</option>
+                <option value="approved" @(Model.Status == "approved" ? "selected" : "")>Đã duyệt</option>
+                <option value="rejected" @(Model.Status == "rejected" ? "selected" : "")>Từ chối</option>
+                <option value="completed" @(Model.Status == "completed" ? "selected" : "")>Hoàn thành</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a asp-action="Index" asp-controller="Reservations" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>

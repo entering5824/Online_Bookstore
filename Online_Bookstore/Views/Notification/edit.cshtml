@@ -1,0 +1,59 @@
+﻿@model Online_Bookstore.Models.Notification
+@{
+    ViewBag.Title = "Sửa thông báo";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/resources/css/bootstrap.min.css" />
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Sửa thông báo</h2>
+
+        @if (!string.IsNullOrEmpty(ViewBag.Error))
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewBag.Error
+            </div>
+        }
+
+        <form asp-action="Edit" asp-controller="Notifications" method="post">
+            <input type="hidden" asp-for="NotificationId" />
+
+            <div class="form-group">
+                <label>Người nhận (ID)</label>
+                <input type="number" asp-for="UserId" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label>Loại</label>
+                <select asp-for="Type" class="form-control">
+                    <option value="overdue" selected="@(Model.Type == "overdue" ? "selected" : null)">Quá hạn</option>
+                    <option value="system" selected="@(Model.Type == "system" ? "selected" : null)">Hệ thống</option>
+                    <option value="reservation" selected="@(Model.Type == "reservation" ? "selected" : null)">Đặt trước</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Nội dung</label>
+                <textarea asp-for="Message" class="form-control" required>@Model.Message</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Trạng thái</label>
+                <select asp-for="IsRead" class="form-control">
+                    <option value="true" selected="@(Model.IsRead ? "selected" : null)">Đã đọc</option>
+                    <option value="false" selected="@(Model.IsRead ? null : "selected")">Chưa đọc</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <a asp-action="Index" asp-controller="Notifications" class="btn btn-secondary">Quay lại</a>
+        </form>
+    </div>
+</body>
+</html>

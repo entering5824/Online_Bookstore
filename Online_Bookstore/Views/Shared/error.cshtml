@@ -1,0 +1,22 @@
+﻿@{
+    Layout = null; // Tắt layout nếu không dùng _Layout.cshtml
+    Response.ContentType = "text/html; charset=UTF-8";
+    var error = ViewBag.Error; // Lấy thông báo lỗi từ controller
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lỗi</title>
+    <link rel="stylesheet" href="~/resources/css/bootstrap.min.css" />
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="alert alert-danger" role="alert">
+            @error
+        </div>
+        <a href="javascript:history.back()" class="btn btn-primary">Quay lại</a>
+    </div>
+</body>
+</html>

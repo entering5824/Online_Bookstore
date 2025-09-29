@@ -1,0 +1,68 @@
+﻿@model BorrowRecordEditViewModel
+@{
+    ViewData["Title"] = "Sửa phiếu mượn";
+}
+
+<div class="container mt-4">
+    <h2>Sửa phiếu mượn</h2>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" name="Record.RecordId" value="@Model.Record.RecordId" />
+
+        <div class="form-group">
+            <label>Người mượn</label>
+            <select name="Record.UserId" class="form-control" required>
+                @foreach (var user in Model.Users)
+                {
+                    <option value="@user.UserId" @(user.UserId == Model.Record.UserId ? "selected" : "")>
+                        @user.FullName (@user.UserCode)
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Sách</label>
+            <select name="Record.BookId" class="form-control" required>
+                @foreach (var book in Model.Books)
+                {
+                    <option value="@book.BookId" @(book.BookId == Model.Record.BookId ? "selected" : "")>
+                        @book.Title
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Ngày mượn</label>
+            <input type="date" name="Record.BorrowDate" class="form-control" value="@Model.Record.BorrowDate.ToString("yyyy-MM-dd")" required />
+        </div>
+
+        <div class="form-group">
+            <label>Hạn trả</label>
+            <input type="date" name="Record.DueDate" class="form-control" value="@Model.Record.DueDate.ToString("yyyy-MM-dd")" required />
+        </div>
+
+        <div class="form-group">
+            <label>Ngày trả</label>
+            <input type="date" name="Record.ReturnDate" class="form-control" value="@(Model.Record.ReturnDate?.ToString("yyyy-MM-dd") ?? "")" />
+        </div>
+
+        <div class="form-group">
+            <label>Trạng thái</label>
+            <select name="Record.Status" class="form-control">
+                <option value="borrowed" @(Model.Record.Status == "borrowed" ? "selected" : "")>Đang mượn</option>
+                <option value="returned" @(Model.Record.Status == "returned" ? "selected" : "")>Đã trả</option>
+                <option value="overdue" @(Model.Record.Status == "overdue" ? "selected" : "")>Quá hạn</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>

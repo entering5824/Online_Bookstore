@@ -1,0 +1,43 @@
+﻿@model IEnumerable<Online_Bookstore.Models.ActivityLog> 
+
+@{
+    Layout = "_Layout"; // Nếu dùng layout chung
+    ViewBag.Title = "Nhật ký hoạt động";
+}
+
+<div class="container mt-4">
+    <h2>Nhật ký hoạt động</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Người dùng</th>
+                <th>Hành động</th>
+                <th>Thời gian</th>
+                <th>IP</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                int index = 0;
+                foreach (var log in Model)
+                {
+                    <tr>
+                        <td>@log.LogId</td>
+                        <td>@log.User.FullName</td>
+                        <td>@log.Action</td>
+                        <td>@log.LogTime.ToString("g")</td> <!-- định dạng ngày giờ -->
+                        <td>@log.IpAddress</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">Chưa có nhật ký nào</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
