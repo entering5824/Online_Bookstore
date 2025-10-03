@@ -1,196 +1,216 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using Online_Bookstore.Models;
+using Online_Bookstore.Repository;
 using Online_Bookstore.Services;
+using Online_Bookstore.Services.Interfaces;
 
 namespace Online_Bookstore.Controllers
 {
-public class ReservationController : Controller
-{
-    private readonly IReservationService _reservationService;
-    private readonly IBookService _bookService;
-    private readonly IUserService _userService;
-
-    public ReservationController(IReservationService reservationService, IBookService bookService, IUserService userService)
+    public class ReservationController : Controller
     {
-        _reservationService = reservationService;
-        _bookService = bookService;
-        _userService = userService;
-    }
+        private readonly IReservationService _reservationService;
+        private readonly IBookService _bookService;
+        private readonly IUserService _userService;
 
-    [HttpGet]
-    public ActionResult Index()
-    {
-        var reservations = _reservationService.GetAllReservations();
-        return View("List", reservations);
-    }
-
-    [HttpGet]
-    public ActionResult Add()
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null || !(user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
-                              user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase) ||
-                              user.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase)))
+        public ReservationController(
+            IReservationService reservationService,
+            IBookService bookService,
+            IUserService userService)
         {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
+            _reservationService = reservationService;
+            _bookService = bookService;
+            _userService = userService;
         }
 
-        ViewBag.Books = _bookService.GetAllBooks();
-        ViewBag.Users = _userService.GetAllUsers();
-        return View("Add", new Reservation());
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Add(int[] bookIds, int userId, string status)
-    {
-        var currentUser = Session["CurrentUser"] as User;
-        if (currentUser == null)
+        // Parameterless constructor required by MVC default activator
+        public ReservationController()
         {
-            TempData["Error"] = "Vui lòng đăng nhập để thực hiện thao tác này!";
-            return RedirectToAction("Index");
+            var context = new ApplicationDbContext();
+            var bookRepository = new BookRepository(context);
+            var userRepository = new UserRepository(context);
+            var reservationRepository = new ReservationRepository(context);
+
+            _bookService = new BookService(bookRepository);
+            _userService = new UserService(context);
+            _reservationService = new ReservationService(reservationRepository, userRepository, bookRepository);
         }
 
-        if (!(currentUser.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
-              currentUser.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase) ||
-              currentUser.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase)))
+        [HttpGet]
+        public async Task<ActionResult> Index()
         {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
+            var reservations = await _reservationService.GetAllReservationsAsync();
+            return View("List", reservations);
         }
 
-        if (bookIds == null || !bookIds.Any())
+        [HttpGet]
+        public async Task<ActionResult> Add()
         {
-            TempData["Error"] = "Vui lòng chọn ít nhất một cuốn sách!";
-            ViewBag.Books = _bookService.GetAllBooks();
-            ViewBag.Users = _userService.GetAllUsers();
+            var user = Session["CurrentUser"] as User;
+            if (user == null || !(user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                                  user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase) ||
+                                  user.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Books = await _bookService.GetAllBooksAsync();
+            ViewBag.Users = await _userService.GetAllUsersAsync();
             return View("Add", new Reservation());
         }
 
-        try
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Add(int[] bookIds, int userId, string status)
         {
-            int targetUserId = userId;
-            if (currentUser.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase))
+            var currentUser = Session["CurrentUser"] as User;
+            if (currentUser == null)
             {
-                if (!currentUser.UserId.HasValue)
+                TempData["Error"] = "Vui lòng đăng nhập để thực hiện thao tác này!";
+                return RedirectToAction("Index");
+            }
+
+            if (!(currentUser.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                  currentUser.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase) ||
+                  currentUser.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
+
+            if (bookIds == null || !bookIds.Any())
+            {
+                TempData["Error"] = "Vui lòng chọn ít nhất một cuốn sách!";
+                ViewBag.Books = await _bookService.GetAllBooksAsync();
+                ViewBag.Users = await _userService.GetAllUsersAsync();
+                return View("Add", new Reservation());
+            }
+
+            try
+            {
+                int targetUserId = userId;
+                if (currentUser.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase))
                 {
-                    TempData["Error"] = "Không thể xác định người dùng!";
-                    return RedirectToAction("Index");
+                    if (currentUser.UserId <= 0)
+                    {
+                        TempData["Error"] = "Không thể xác định người dùng!";
+                        return RedirectToAction("Index");
+                    }
+                    targetUserId = currentUser.UserId;
+
                 }
-                targetUserId = currentUser.UserId.Value;
-            }
 
-            foreach (var bookId in bookIds)
-            {
-                var reservation = new Reservation
+                foreach (var bookId in bookIds)
                 {
-                    User = _userService.GetUserById(targetUserId),
-                    Book = _bookService.GetBookById(bookId),
-                    Status = string.IsNullOrWhiteSpace(status) ? "Chờ xử lý" : status,
-                    ReservationDate = DateTime.Now
-                };
-                _reservationService.SaveReservation(reservation);
+                    var reservation = new Reservation
+                    {
+                        User = await _userService.GetUserByIdAsync(targetUserId),
+                        Book = await _bookService.GetBookByIdAsync(bookId),
+                        Status = string.IsNullOrWhiteSpace(status) ? "Chờ xử lý" : status,
+                        ReservationDate = DateTime.Now
+                    };
+                    await _reservationService.SaveReservationAsync(reservation);
+                }
+
+                TempData["Success"] = "Thêm đặt trước thành công!";
+            }
+            catch (Exception e)
+            {
+                TempData["Error"] = "Lỗi: " + e.Message;
+                ViewBag.Books = await _bookService.GetAllBooksAsync();
+                ViewBag.Users = await _userService.GetAllUsersAsync();
+                return View("Add", new Reservation());
             }
 
-            TempData["Success"] = "Thêm đặt trước thành công!";
-        }
-        catch (Exception e)
-        {
-            TempData["Error"] = "Lỗi: " + e.Message;
-            ViewBag.Books = _bookService.GetAllBooks();
-            ViewBag.Users = _userService.GetAllUsers();
-            return View("Add", new Reservation());
-        }
-
-        return RedirectToAction("Index");
-    }
-
-    [HttpGet]
-    public ActionResult Edit(int id)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null || !(user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
-                              user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
-        {
-            TempData["NoPermission"] = true;
             return RedirectToAction("Index");
         }
 
-        var reservation = _reservationService.GetReservationById(id);
-        if (reservation == null)
+        [HttpGet]
+        public async Task<ActionResult> Edit(int id)
         {
-            TempData["Error"] = "Không tìm thấy đặt trước!";
-            return RedirectToAction("Index");
-        }
+            var user = Session["CurrentUser"] as User;
+            if (user == null || !(user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                                  user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
 
-        ViewBag.Books = _bookService.GetAllBooks();
-        ViewBag.Users = _userService.GetAllUsers();
-        return View("Edit", reservation);
-    }
+            var reservation = await _reservationService.GetReservationByIdAsync(id);
+            if (reservation == null)
+            {
+                TempData["Error"] = "Không tìm thấy đặt trước!";
+                return RedirectToAction("Index");
+            }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Edit(Reservation reservation)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null || !(user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
-                              user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
-        {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
-        }
-
-        if (!ModelState.IsValid)
-        {
-            ViewBag.Books = _bookService.GetAllBooks();
-            ViewBag.Users = _userService.GetAllUsers();
+            ViewBag.Books = await _bookService.GetAllBooksAsync();
+            ViewBag.Users = await _userService.GetAllUsersAsync();
             return View("Edit", reservation);
         }
 
-        try
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(Reservation reservation)
         {
-            if (string.IsNullOrWhiteSpace(reservation.Status))
-                reservation.Status = "pending";
+            var user = Session["CurrentUser"] as User;
+            if (user == null || !(user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                                  user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
 
-            _reservationService.SaveReservation(reservation);
-            TempData["Success"] = "Cập nhật đặt trước thành công!";
-        }
-        catch (Exception e)
-        {
-            TempData["Error"] = "Lỗi: " + e.Message;
-            ViewBag.Books = _bookService.GetAllBooks();
-            ViewBag.Users = _userService.GetAllUsers();
-            return View("Edit", reservation);
-        }
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Books = await _bookService.GetAllBooksAsync();
+                ViewBag.Users = await _userService.GetAllUsersAsync();
+                return View("Edit", reservation);
+            }
 
-        return RedirectToAction("Index");
-    }
+            try
+            {
+                if (string.IsNullOrWhiteSpace(reservation.Status))
+                    reservation.Status = "pending";
 
-    [HttpGet]
-    public ActionResult Delete(int id)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null || !(user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
-                              user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
-        {
-            TempData["NoPermission"] = true;
+                await _reservationService.SaveReservationAsync(reservation);
+                TempData["Success"] = "Cập nhật đặt trước thành công!";
+            }
+            catch (Exception e)
+            {
+                TempData["Error"] = "Lỗi: " + e.Message;
+                ViewBag.Books = await _bookService.GetAllBooksAsync();
+                ViewBag.Users = await _userService.GetAllUsersAsync();
+                return View("Edit", reservation);
+            }
+
             return RedirectToAction("Index");
         }
 
-        try
+        [HttpGet]
+        public async Task<ActionResult> Delete(int id)
         {
-            _reservationService.DeleteReservation(id);
-            TempData["Success"] = "Xóa đặt trước thành công!";
-        }
-        catch (Exception e)
-        {
-            TempData["Error"] = "Lỗi: " + e.Message;
-        }
+            var user = Session["CurrentUser"] as User;
+            if (user == null || !(user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                                  user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
 
-        return RedirectToAction("Index");
+            try
+            {
+                await _reservationService.DeleteReservationAsync(id);
+                TempData["Success"] = "Xóa đặt trước thành công!";
+            }
+            catch (Exception e)
+            {
+                TempData["Error"] = "Lỗi: " + e.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
     }
-}
 }

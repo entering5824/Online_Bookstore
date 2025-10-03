@@ -1,148 +1,201 @@
 ﻿@{
-    ViewBag.Title = "Thống kê tổng quan";
-    Layout = null; // Nếu bạn muốn dùng layout, đổi thành Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Statistics Dashboard";
+    var totalBooks = ViewBag.TotalBooks;
+    var totalUsers = ViewBag.TotalUsers;
+    var totalBorrowRecords = ViewBag.TotalBorrowRecords;
+    var totalReservations = ViewBag.TotalReservations;
+    var booksByCategory = ViewBag.BooksByCategory as Dictionary<string, int>;
+    var borrowRecordsByStatus = ViewBag.BorrowRecordsByStatus as Dictionary<string, int>;
+    var reservationsByStatus = ViewBag.ReservationsByStatus as Dictionary<string, int>;
+    var usersByRole = ViewBag.UsersByRole as Dictionary<string, int>;
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>@ViewBag.Title</title>
-    <link rel="stylesheet" href="~/resources/css/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <div class="container-fluid mt-4">
-        <h2>📊 @ViewBag.Title</h2>
-
-        <!-- Thống kê tổng quan -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">📚 Tổng số sách</h5>
-                        <h2 class="card-text">@totalBooks</h2>
-                    </div>
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-0">
+                        <i class="fas fa-chart-bar me-2 text-primary"></i>Statistics Dashboard
+                    </h1>
+                    <p class="text-muted">Comprehensive overview of your bookstore data</p>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">👥 Tổng số người dùng</h5>
-                        <h2 class="card-text">@totalUsers</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">📖 Tổng phiếu mượn</h5>
-                        <h2 class="card-text">@totalBorrowRecords</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">📋 Tổng đặt sách</h5>
-                        <h2 class="card-text">@totalReservations</h2>
-                    </div>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="toggleDarkMode()">
+                        <i class="fas fa-moon" id="icon-darkmode"></i>
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Biểu đồ -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>📊 Sách theo thể loại</h5>
+    <!-- Statistics Overview -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-book fa-3x"></i>
                     </div>
-                    <div class="card-body">
-                        <canvas id="categoryChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>📊 Phiếu mượn theo trạng thái</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="borrowStatusChart" width="400" height="200"></canvas>
-                    </div>
+                    <h5 class="card-title">Total Books</h5>
+                    <h2 class="card-text">@totalBooks</h2>
                 </div>
             </div>
         </div>
-
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>📊 Đặt sách theo trạng thái</h5>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-users fa-3x"></i>
                     </div>
-                    <div class="card-body">
-                        <canvas id="reservationStatusChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>📊 Người dùng theo vai trò</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="userRoleChart" width="400" height="200"></canvas>
-                    </div>
+                    <h5 class="card-title">Total Users</h5>
+                    <h2 class="card-text">@totalUsers</h2>
                 </div>
             </div>
         </div>
-
-        <!-- Menu thống kê chi tiết -->
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>🔍 Thống kê chi tiết</h5>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-book-reader fa-3x"></i>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <a href="~/statistics/books" class="btn btn-primary btn-lg btn-block">
-                                    📚 Thống kê sách
-                                </a>
-                            </div>
-                            <div class="col-md-4">
-                                <a href="~/statistics/users" class="btn btn-success btn-lg btn-block">
-                                    👥 Thống kê người dùng
-                                </a>
-                            </div>
-                            <div class="col-md-4">
-                                <a href="~/statistics/borrow-records" class="btn btn-warning btn-lg btn-block">
-                                    📖 Thống kê phiếu mượn
-                                </a>
-                            </div>
+                    <h5 class="card-title">Borrow Records</h5>
+                    <h2 class="card-text">@totalBorrowRecords</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-calendar-check fa-3x"></i>
+                    </div>
+                    <h5 class="card-title">Reservations</h5>
+                    <h2 class="card-text">@totalReservations</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Books by Category
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-doughnut me-2"></i>Borrow Records by Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="borrowStatusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Reservations by Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="reservationStatusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Users by Role
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="userRoleChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="@Url.Action("ListBooks", "Book")" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center py-4">
+                                <i class="fas fa-book fa-2x mb-2"></i>
+                                <span>Manage Books</span>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="@Url.Action("ListUsers", "User")" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center align-items-center py-4">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <span>Manage Users</span>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="@Url.Action("ListBorrowRecords", "BorrowRecord")" class="btn btn-outline-warning w-100 h-100 d-flex flex-column justify-content-center align-items-center py-4">
+                                <i class="fas fa-book-reader fa-2x mb-2"></i>
+                                <span>Borrow Records</span>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-// Biểu đồ sách theo thể loại
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Books by Category Chart
 const categoryCtx = document.getElementById('categoryChart').getContext('2d');
 const categoryChart = new Chart(categoryCtx, {
     type: 'pie',
     data: {
         labels: [
-            @foreach (var entry in booksByCategory) {
-                '@entry.Key',
+            @if (booksByCategory != null)
+            {
+                @foreach (var entry in booksByCategory)
+                {
+                    <text>'@entry.Key',</text>
+                }
             }
         ],
         datasets: [{
             data: [
-                @foreach (var entry in booksByCategory) {
-                    @entry.Value,
+                @if (booksByCategory != null)
+                {
+                    @foreach (var entry in booksByCategory)
+                    {
+                        <text>@entry.Value,</text>
+                    }
                 }
             ],
             backgroundColor: [
@@ -151,75 +204,117 @@ const categoryChart = new Chart(categoryCtx, {
             ]
         }]
     },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    options: { 
+        responsive: true, 
+        plugins: { 
+            legend: { position: 'bottom' } 
+        } 
+    }
 });
 
-// Biểu đồ phiếu mượn theo trạng thái
+// Borrow Records by Status Chart
 const borrowStatusCtx = document.getElementById('borrowStatusChart').getContext('2d');
 const borrowStatusChart = new Chart(borrowStatusCtx, {
     type: 'doughnut',
     data: {
         labels: [
-            @foreach (var entry in borrowRecordsByStatus) {
-                '@entry.Key',
+            @if (borrowRecordsByStatus != null)
+            {
+                @foreach (var entry in borrowRecordsByStatus)
+                {
+                    <text>'@entry.Key',</text>
+                }
             }
         ],
         datasets: [{
             data: [
-                @foreach (var entry in borrowRecordsByStatus) {
-                    @entry.Value,
+                @if (borrowRecordsByStatus != null)
+                {
+                    @foreach (var entry in borrowRecordsByStatus)
+                    {
+                        <text>@entry.Value,</text>
+                    }
                 }
             ],
             backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
         }]
     },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    options: { 
+        responsive: true, 
+        plugins: { 
+            legend: { position: 'bottom' } 
+        } 
+    }
 });
 
-// Biểu đồ đặt sách theo trạng thái
+// Reservations by Status Chart
 const reservationStatusCtx = document.getElementById('reservationStatusChart').getContext('2d');
 const reservationStatusChart = new Chart(reservationStatusCtx, {
     type: 'bar',
     data: {
         labels: [
-            @foreach (var entry in reservationsByStatus) {
-                '@entry.Key',
+            @if (reservationsByStatus != null)
+            {
+                @foreach (var entry in reservationsByStatus)
+                {
+                    <text>'@entry.Key',</text>
+                }
             }
         ],
         datasets: [{
-            label: 'Số lượng',
+            label: 'Count',
             data: [
-                @foreach (var entry in reservationsByStatus) {
-                    @entry.Value,
+                @if (reservationsByStatus != null)
+                {
+                    @foreach (var entry in reservationsByStatus)
+                    {
+                        <text>@entry.Value,</text>
+                    }
                 }
             ],
             backgroundColor: '#36A2EB'
         }]
     },
-    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    options: { 
+        responsive: true, 
+        scales: { 
+            y: { beginAtZero: true } 
+        } 
+    }
 });
 
-// Biểu đồ người dùng theo vai trò
+// Users by Role Chart
 const userRoleCtx = document.getElementById('userRoleChart').getContext('2d');
 const userRoleChart = new Chart(userRoleCtx, {
     type: 'pie',
     data: {
         labels: [
-            @foreach (var entry in usersByRole) {
-                '@entry.Key',
+            @if (usersByRole != null)
+            {
+                @foreach (var entry in usersByRole)
+                {
+                    <text>'@entry.Key',</text>
+                }
             }
         ],
         datasets: [{
             data: [
-                @foreach (var entry in usersByRole) {
-                    @entry.Value,
+                @if (usersByRole != null)
+                {
+                    @foreach (var entry in usersByRole)
+                    {
+                        <text>@entry.Value,</text>
+                    }
                 }
             ],
             backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
         }]
     },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    options: { 
+        responsive: true, 
+        plugins: { 
+            legend: { position: 'bottom' } 
+        } 
+    }
 });
-    </script>
-</body>
-</html>
+</script>

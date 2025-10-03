@@ -1,5 +1,5 @@
-﻿using Online_Bookstore.Models;
-using Online_Bookstore.Service;
+﻿using System;
+using Online_Bookstore.Models;
 using Online_Bookstore.Services;
 using System.Web.Mvc;
 
@@ -12,6 +12,11 @@ public class BookCategoryController : Controller
     public BookCategoryController(BookCategoryService bookCategoryService)
     {
         _bookCategoryService = bookCategoryService;
+    }
+
+    // Parameterless constructor required by MVC default activator
+    public BookCategoryController()
+    {
     }
 
     public ActionResult ListCategories()

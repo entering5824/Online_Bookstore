@@ -1,4 +1,5 @@
-﻿using Online_Bookstore.Models;
+﻿using System;
+using Online_Bookstore.Models;
 using Online_Bookstore.Repository;
 using Online_Bookstore.Services;
 using Online_Bookstore.Utils;
@@ -19,6 +20,11 @@ public class BookController : Controller
     {
         _bookService = bookService;
         _bookCategoryRepository = bookCategoryRepository;
+    }
+
+    // Parameterless constructor required by MVC default activator
+    public BookController()
+    {
     }
 
     [HttpGet, Route("")]

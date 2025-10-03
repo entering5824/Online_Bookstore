@@ -1,6 +1,8 @@
-﻿using System.Web.Mvc;
+﻿using System.Threading.Tasks;
+using System.Web.Mvc;
 using Online_Bookstore.Models;
-using Online_Bookstore.Service;
+using Online_Bookstore.Repository;
+using Online_Bookstore.Services;
 
 namespace Online_Bookstore.Controllers
 {
@@ -10,12 +12,18 @@ namespace Online_Bookstore.Controllers
 
         public ActivityLogController()
         {
-            _activityLogService = new ActivityLogService();
+            // Fallback simple wiring without DI container
+            _activityLogService = new ActivityLogService(new ActivityLogRepository(new ApplicationDbContext()));
         }
 
-        public ActionResult ListActivityLogs()
+        // Parameterless constructor required by MVC default activator
+        public ActivityLogController(bool unused = false)
         {
-            var logs = _activityLogService.GetAllActivityLogs();
+        }
+
+        public async Task<ActionResult> ListActivityLogs()
+        {
+            var logs = await _activityLogService.GetAllActivityLogsAsync();
             ViewBag.Logs = logs;
             ViewBag.Content = "activitylog/list";
             return View("layout/main");
@@ -44,7 +52,7 @@ namespace Online_Bookstore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddActivityLog(ActivityLog log)
+        public async Task<ActionResult> AddActivityLog(ActivityLog log)
         {
             if (!ModelState.IsValid)
             {
@@ -53,14 +61,14 @@ namespace Online_Bookstore.Controllers
                 return View("layout/main");
             }
 
-            _activityLogService.SaveActivityLog(log);
+            await _activityLogService.SaveActivityLogAsync(log);
             return RedirectToAction("ListActivityLogs");
         }
 
         [HttpGet]
-        public ActionResult ShowEditForm(int id)
+        public async Task<ActionResult> ShowEditForm(int id)
         {
-            var log = _activityLogService.GetActivityLogById(id);
+            var log = await _activityLogService.GetActivityLogByIdAsync(id);
             if (log == null) return RedirectToAction("ListActivityLogs");
 
             ViewBag.ActivityLog = log;
@@ -70,7 +78,7 @@ namespace Online_Bookstore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditActivityLog(ActivityLog log)
+        public async Task<ActionResult> EditActivityLog(ActivityLog log)
         {
             if (!ModelState.IsValid)
             {
@@ -79,14 +87,14 @@ namespace Online_Bookstore.Controllers
                 return View("layout/main");
             }
 
-            _activityLogService.SaveActivityLog(log);
+            await _activityLogService.SaveActivityLogAsync(log);
             return RedirectToAction("ListActivityLogs");
         }
 
         [HttpGet]
-        public ActionResult DeleteActivityLog(int id)
+        public async Task<ActionResult> DeleteActivityLog(int id)
         {
-            _activityLogService.DeleteActivityLog(id);
+            await _activityLogService.DeleteActivityLogAsync(id);
             return RedirectToAction("ListActivityLogs");
         }
     }

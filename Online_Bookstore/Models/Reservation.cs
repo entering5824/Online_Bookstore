@@ -10,6 +10,7 @@ namespace Online_Bookstore.Models
     public class Reservation
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("reservation_id")]
         public int ReservationId { get; set; }
 

@@ -3,23 +3,39 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using Online_Bookstore.Models;
 using Online_Bookstore.Services;
+using System.Threading.Tasks;
+using Online_Bookstore.Repository;
 
 namespace Online_Bookstore.Controllers
 {
 public class StatisticsController : Controller
 {
-    private readonly IBookService _bookService;
-    private readonly IUserService _userService;
-    private readonly IBorrowRecordService _borrowRecordService;
-    private readonly IReservationService _reservationService;
+    private readonly BookService _bookService;
+    private readonly UserService _userService;
+    private readonly BorrowRecordService _borrowRecordService;
+    private readonly ReservationService _reservationService;
 
-    public StatisticsController(IBookService bookService, IUserService userService,
-                                IBorrowRecordService borrowRecordService, IReservationService reservationService)
+    public StatisticsController(BookService bookService, UserService userService,
+                                BorrowRecordService borrowRecordService, ReservationService reservationService)
     {
         _bookService = bookService;
         _userService = userService;
         _borrowRecordService = borrowRecordService;
         _reservationService = reservationService;
+    }
+
+    public StatisticsController()
+    {
+        var context = new ApplicationDbContext();
+        var bookRepository = new BookRepository(context);
+        var userRepository = new UserRepository(context);
+        var borrowRecordRepository = new BorrowRecordRepository(context);
+        var reservationRepository = new ReservationRepository(context);
+
+        _bookService = new BookService(bookRepository);
+        _userService = new UserService(context);
+        _borrowRecordService = new BorrowRecordService(borrowRecordRepository, userRepository, bookRepository);
+        _reservationService = new ReservationService(reservationRepository, userRepository, bookRepository);
     }
 
     private bool IsAdminOrLibrarian(User user) =>

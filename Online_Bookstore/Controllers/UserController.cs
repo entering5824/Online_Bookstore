@@ -1,170 +1,177 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Online_Bookstore.Utils;
 using System.Web.Mvc;
 using Online_Bookstore.Models;
-using Online_Bookstore.Services;
+using Online_Bookstore.Services.Interfaces;
 
 namespace Online_Bookstore.Controllers
 {
- public class UserController : Controller
-{
-    private readonly IUserService _userService;
-
-    public UserController(IUserService userService)
+    public class UserController : Controller
     {
-        _userService = userService;
-    }
+        private readonly IUserService _userService;
 
-    private bool IsAdmin(User user) =>
-        user != null && user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase);
-
-    [HttpGet]
-    public ActionResult Index()
-    {
-        var user = Session["CurrentUser"] as User;
-        if (!IsAdmin(user))
+        public UserController(IUserService userService)
         {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index", "Home");
+            _userService = userService;
         }
 
-        var users = _userService.GetAllUsers();
-        ViewBag.Users = users;
-        return View("List");
-    }
-
-    [HttpGet]
-    public ActionResult Add()
-    {
-        var user = Session["CurrentUser"] as User;
-        if (!IsAdmin(user))
+        // Parameterless constructor required by MVC default activator
+        public UserController()
         {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
         }
 
-        ViewBag.User = new User();
-        return View("Add");
-    }
+        private bool IsAdmin(User user) =>
+            user != null && user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase);
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Add(User user, string rawPassword)
-    {
-        var currentUser = Session["CurrentUser"] as User;
-        if (!IsAdmin(currentUser))
+        [HttpGet]
+        public async Task<ActionResult> Index()
         {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
+            var user = Session["CurrentUser"] as User;
+            if (!IsAdmin(user))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index", "Home");
+            }
+
+            var users = await _userService.GetAllUsersAsync();
+            ViewBag.Users = users;
+            return View("List");
         }
 
-        if (!ModelState.IsValid)
+        [HttpGet]
+        public ActionResult Add()
         {
-            ViewBag.User = user;
+            var user = Session["CurrentUser"] as User;
+            if (!IsAdmin(user))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.User = new User();
             return View("Add");
         }
 
-        if (_userService.FindByUsername(user.Username) != null)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Add(User user, string rawPassword)
         {
-            TempData["Error"] = "Tên đăng nhập đã tồn tại!";
-            ViewBag.User = user;
-            return View("Add");
-        }
+            var currentUser = Session["CurrentUser"] as User;
+            if (!IsAdmin(currentUser))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
 
-        if (_userService.FindByEmail(user.Email) != null)
-        {
-            TempData["Error"] = "Email đã tồn tại!";
-            ViewBag.User = user;
-            return View("Add");
-        }
+            if (!ModelState.IsValid)
+            {
+                ViewBag.User = user;
+                return View("Add");
+            }
 
-        user.PasswordHash = CommonCrypto.Sha256Hash(rawPassword);
-        _userService.SaveUser(user);
-        return RedirectToAction("Index");
-    }
+            if (await _userService.FindByUsernameAsync(user.Username) != null)
+            {
+                TempData["Error"] = "Tên đăng nhập đã tồn tại!";
+                ViewBag.User = user;
+                return View("Add");
+            }
 
-    [HttpGet]
-    public ActionResult Edit(int id)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (!IsAdmin(user))
-        {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index", "Home");
-        }
+            if (await _userService.FindByEmailAsync(user.Email) != null)
+            {
+                TempData["Error"] = "Email đã tồn tại!";
+                ViewBag.User = user;
+                return View("Add");
+            }
 
-        var editUser = _userService.GetUserById(id);
-        if (editUser == null)
-        {
-            TempData["Error"] = "Không tìm thấy người dùng!";
+            user.PasswordHash = CommonCrypto.Sha256Hash(rawPassword);
+            await _userService.SaveUserAsync(user);
             return RedirectToAction("Index");
         }
 
-        ViewBag.User = editUser;
-        return View("Edit");
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Edit(User user)
-    {
-        var currentUser = Session["CurrentUser"] as User;
-        if (!IsAdmin(currentUser))
+        [HttpGet]
+        public async Task<ActionResult> Edit(int id)
         {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
-        }
+            var user = Session["CurrentUser"] as User;
+            if (!IsAdmin(user))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index", "Home");
+            }
 
-        if (!ModelState.IsValid)
-        {
-            ViewBag.User = user;
+            var editUser = await _userService.GetUserByIdAsync(id);
+            if (editUser == null)
+            {
+                TempData["Error"] = "Không tìm thấy người dùng!";
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.User = editUser;
             return View("Edit");
         }
 
-        if (_userService.GetUserById(user.UserId) == null)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(User user)
         {
-            TempData["Error"] = "Không tìm thấy người dùng!";
+            var currentUser = Session["CurrentUser"] as User;
+            if (!IsAdmin(currentUser))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.User = user;
+                return View("Edit");
+            }
+
+            if (await _userService.GetUserByIdAsync(user.UserId) == null)
+            {
+                TempData["Error"] = "Không tìm thấy người dùng!";
+                return RedirectToAction("Index");
+            }
+
+            await _userService.SaveUserAsync(user);
             return RedirectToAction("Index");
         }
 
-        _userService.SaveUser(user);
-        return RedirectToAction("Index");
+        [HttpGet]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var user = Session["CurrentUser"] as User;
+            if (!IsAdmin(user))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index", "Home");
+            }
+
+            try
+            {
+                await _userService.DeleteUserAsync(id);
+                TempData["Success"] = "Xóa người dùng thành công!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi: " + ex.Message;
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public ActionResult Account()
+        {
+            var user = Session["CurrentUser"] as User;
+            if (user == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để xem thông tin tài khoản!";
+                return RedirectToAction("Login", "Login");
+            }
+
+            ViewBag.User = user;
+            return View("Account");
+        }
     }
-
-    [HttpGet]
-    public ActionResult Delete(int id)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (!IsAdmin(user))
-        {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index", "Home");
-        }
-
-        try
-        {
-            _userService.DeleteUser(id);
-            TempData["Success"] = "Xóa người dùng thành công!";
-        }
-        catch (Exception ex)
-        {
-            TempData["Error"] = "Lỗi: " + ex.Message;
-        }
-        return RedirectToAction("Index");
-    }
-
-    [HttpGet]
-    public ActionResult Account()
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null)
-        {
-            TempData["Error"] = "Vui lòng đăng nhập để xem thông tin tài khoản!";
-            return RedirectToAction("Login", "Login");
-        }
-
-        ViewBag.User = user;
-        return View("Account");
-    }
-}
 }

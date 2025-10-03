@@ -1,10 +1,10 @@
 ﻿using Online_Bookstore.Models;
 using Online_Bookstore.Services;
+using Online_Bookstore.Services.Interfaces;
+using Online_Bookstore.Utils;
 using System;
-using System.Security.Cryptography;
-using System.Text;
+using System.Threading.Tasks;
 using System.Web.Mvc;
-using System.Web.Security;
 
 namespace Online_Bookstore.Controllers
 {
@@ -17,17 +17,24 @@ namespace Online_Bookstore.Controllers
         _userService = userService;
     }
 
+    // Parameterless constructor required by MVC default activator
+    public LoginController()
+    {
+        var context = new ApplicationDbContext();
+        _userService = new UserService(context);
+    }
+
     [HttpGet]
     public ActionResult Login()
     {
-        return View("Login");
+        return View("~/Views/Account/Login.cshtml");
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Login(string username, string password)
+    public async Task<ActionResult> Login(string username, string password)
     {
-        var user = _userService.FindByUsername(username) ?? _userService.FindByEmail(username);
+        var user = await _userService.FindByUsernameAsync(username) ?? await _userService.FindByEmailAsync(username);
 
         if (user != null && user.PasswordHash == CommonCrypto.Sha256Hash(password))
         {
@@ -41,7 +48,7 @@ namespace Online_Bookstore.Controllers
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Register(string fullName, string email, string username, string password, string confirmPassword)
+    public async Task<ActionResult> Register(string fullName, string email, string username, string password, string confirmPassword)
     {
         if (password != confirmPassword)
         {
@@ -49,13 +56,13 @@ namespace Online_Bookstore.Controllers
             return RedirectToAction("Login");
         }
 
-        if (_userService.FindByUsername(username) != null)
+        if (await _userService.FindByUsernameAsync(username) != null)
         {
             TempData["Error"] = "Tên đăng nhập đã tồn tại!";
             return RedirectToAction("Login");
         }
 
-        if (_userService.FindByEmail(email) != null)
+        if (await _userService.FindByEmailAsync(email) != null)
         {
             TempData["Error"] = "Email đã tồn tại!";
             return RedirectToAction("Login");
@@ -72,7 +79,7 @@ namespace Online_Bookstore.Controllers
 
         try
         {
-            _userService.SaveUser(newUser);
+            await _userService.SaveUserAsync(newUser);
             TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
         }
         catch (Exception e)

@@ -1,5 +1,6 @@
 ﻿@{
-    Layout = "_Layout"; // Dùng layout chung
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Home";
     var error = ViewBag.Error;
     var totalBooks = ViewBag.TotalBooks;
     var totalUsers = ViewBag.TotalUsers;
@@ -7,181 +8,231 @@
     var totalReservations = ViewBag.TotalReservations;
     var topBorrowedBooks = ViewBag.TopBorrowedBooks as List<Tuple<string, int>>;
     var topReservedBooks = ViewBag.TopReservedBooks as List<Tuple<string, int>>;
-    var currentUser = ViewBag.CurrentUser; // giả sử object có FullName và Role
+    var currentUser = ViewBag.CurrentUser;
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="jumbotron">
-                <h1 class="display-4">Chào mừng đến với Thư viện trực tuyến!</h1>
-                <p class="lead">Khám phá kho tàng sách và tài nguyên số phong phú của chúng tôi.</p>
-                <hr class="my-4">
-
-                @if (!string.IsNullOrEmpty(error))
-                {
-                    <div class="alert alert-warning" role="alert">
-                        <i class="fas fa-exclamation-triangle"></i> @error
-                    </div>
-                }
-
+<!-- Hero Section -->
+<section class="bg-light padding-large">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 mb-4">Welcome to Online Bookstore</h1>
+                <p class="lead mb-4">Discover our vast collection of books and digital resources. Your gateway to knowledge and learning.</p>
+                
                 @if (currentUser == null)
                 {
-                    <p>Bạn chưa đăng nhập. Vui lòng đăng nhập để sử dụng đầy đủ tính năng.</p>
-                    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#loginModal">
-                        Đăng nhập
-                    </button>
-                    <button type="button" class="btn btn-success btn-lg ml-2" data-toggle="modal" data-target="#registerModal">
-                        Đăng ký
-                    </button>
+                    <div class="d-flex gap-3">
+                        <a href="@Url.Action("Login", "Login")" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                        <a href="@Url.Action("Register", "Login")" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Register
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success">
+                        <h4>Welcome back, @currentUser.FullName!</h4>
+                        <p>You are logged in as: <strong>@currentUser.Role</strong></p>
+                    </div>
                 }
             </div>
-        </div>
-    </div>
-
-    <!-- Thống kê tổng quan -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <h5 class="card-title">📚 Tổng số sách</h5>
-                    <h2 class="card-text">@totalBooks</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h5 class="card-title">👥 Tổng số người dùng</h5>
-                    <h2 class="card-text">@totalUsers</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body text-center">
-                    <h5 class="card-title">📖 Tổng phiếu mượn</h5>
-                    <h2 class="card-text">@totalBorrowRecords</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center">
-                    <h5 class="card-title">📋 Tổng đặt sách</h5>
-                    <h2 class="card-text">@totalReservations</h2>
+            <div class="col-lg-6 text-center">
+                <div class="book">
+                    <div class="inner">
+                        <div class="left"></div>
+                        <div class="middle"></div>
+                        <div class="right"></div>
+                    </div>
+                    <ul>
+                        <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-    <!-- Menu chính -->
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">📚 Sách</h5>
-                    <p class="card-text">Khám phá kho sách phong phú với nhiều thể loại khác nhau.</p>
-                    <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Xem sách</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">💻 Tài nguyên số</h5>
-                    <p class="card-text">Truy cập các tài nguyên số, tài liệu điện tử.</p>
-                    <a asp-controller="DigitalResources" asp-action="Index" class="btn btn-primary">Xem tài nguyên</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top sách mượn nhiều nhất -->
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>🏆 Top 10 sách được mượn nhiều nhất</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Tên sách</th>
-                                    <th>Số lần mượn</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (topBorrowedBooks != null)
-                                {
-                                    var idx = 1;
-                                    foreach (var book in topBorrowedBooks)
-                                    {
-                                        <tr>
-                                            <td>@idx</td>
-                                            <td>@book.Item1</td>
-                                            <td><span class="badge badge-primary">@book.Item2</span></td>
-                                        </tr>
-                                        idx++;
-                                    }
-                                }
-                            </tbody>
-                        </table>
+<!-- Statistics Section -->
+<section class="padding-medium">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-book fa-3x"></i>
+                        </div>
+                        <h5 class="card-title">Total Books</h5>
+                        <h2 class="card-text">@totalBooks</h2>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Top sách đặt nhiều nhất -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>🏆 Top 10 sách được đặt nhiều nhất</h5>
+            <div class="col-md-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-users fa-3x"></i>
+                        </div>
+                        <h5 class="card-title">Total Users</h5>
+                        <h2 class="card-text">@totalUsers</h2>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Tên sách</th>
-                                    <th>Số lần đặt</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (topReservedBooks != null)
-                                {
-                                    var idx2 = 1;
-                                    foreach (var book in topReservedBooks)
-                                    {
-                                        <tr>
-                                            <td>@idx2</td>
-                                            <td>@book.Item1</td>
-                                            <td><span class="badge badge-success">@book.Item2</span></td>
-                                        </tr>
-                                        idx2++;
-                                    }
-                                }
-                            </tbody>
-                        </table>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-book-reader fa-3x"></i>
+                        </div>
+                        <h5 class="card-title">Borrow Records</h5>
+                        <h2 class="card-text">@totalBorrowRecords</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-check fa-3x"></i>
+                        </div>
+                        <h5 class="card-title">Reservations</h5>
+                        <h2 class="card-text">@totalReservations</h2>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-    @if (currentUser != null)
-    {
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="alert alert-info">
-                    <h4>Chào mừng, @currentUser.FullName!</h4>
-                    <p>Bạn đã đăng nhập với vai trò: <strong>@currentUser.Role</strong></p>
+<!-- Quick Access Section -->
+<section class="bg-light padding-medium">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-book fa-4x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Books</h5>
+                        <p class="card-text">Explore our rich collection of books across various genres and categories.</p>
+                        <a href="@Url.Action("ListBooks", "Book")" class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i>View Books
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-laptop fa-4x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Digital Resources</h5>
+                        <p class="card-text">Access digital resources, e-books, and electronic documents.</p>
+                        <a href="@Url.Action("Index", "DigitalResource")" class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i>View Resources
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    }
-</div>
+    </div>
+</section>
+
+<!-- Top Books Section -->
+<section class="padding-medium">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-trophy me-2"></i>Top 10 Most Borrowed Books
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Book Title</th>
+                                        <th>Borrow Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (topBorrowedBooks != null)
+                                    {
+                                        var idx = 1;
+                                        foreach (var book in topBorrowedBooks)
+                                        {
+                                            <tr>
+                                                <td>@idx</td>
+                                                <td>@book.Item1</td>
+                                                <td><span class="badge bg-primary">@book.Item2</span></td>
+                                            </tr>
+                                            idx++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted">No data available</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-trophy me-2"></i>Top 10 Most Reserved Books
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Book Title</th>
+                                        <th>Reservation Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (topReservedBooks != null)
+                                    {
+                                        var idx2 = 1;
+                                        foreach (var book in topReservedBooks)
+                                        {
+                                            <tr>
+                                                <td>@idx2</td>
+                                                <td>@book.Item1</td>
+                                                <td><span class="badge bg-success">@book.Item2</span></td>
+                                            </tr>
+                                            idx2++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted">No data available</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

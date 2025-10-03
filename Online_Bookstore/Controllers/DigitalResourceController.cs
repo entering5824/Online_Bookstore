@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using Online_Bookstore.Models;
 using Online_Bookstore.Services;
+using Online_Bookstore.Services.Interfaces;
 
 namespace Online_Bookstore.Controllers
 {
@@ -16,9 +15,14 @@ public class DigitalResourceController : Controller
         _digitalResourceService = digitalResourceService;
     }
 
-    public ActionResult Index()
+    // Parameterless constructor required by MVC default activator
+    public DigitalResourceController()
     {
-        var resources = _digitalResourceService.GetAllDigitalResources();
+    }
+
+    public async System.Threading.Tasks.Task<ActionResult> Index()
+    {
+        var resources = await _digitalResourceService.GetAllDigitalResourcesAsync();
         ViewBag.Resources = resources;
         ViewBag.Content = "digitalresource/list";
         return View("layout/main");
@@ -47,7 +51,7 @@ public class DigitalResourceController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Add(DigitalResource resource)
+    public async System.Threading.Tasks.Task<ActionResult> Add(DigitalResource resource)
     {
         var user = Session["CurrentUser"] as User;
         if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
@@ -66,7 +70,7 @@ public class DigitalResourceController : Controller
 
         try
         {
-            _digitalResourceService.SaveDigitalResource(resource);
+            await _digitalResourceService.SaveDigitalResourceAsync(resource);
             TempData["Success"] = "Thêm tài nguyên số thành công!";
         }
         catch (Exception ex)
@@ -81,7 +85,7 @@ public class DigitalResourceController : Controller
     }
 
     [HttpGet]
-    public ActionResult Edit(int id)
+    public async System.Threading.Tasks.Task<ActionResult> Edit(int id)
     {
         var user = Session["CurrentUser"] as User;
         if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
@@ -91,7 +95,7 @@ public class DigitalResourceController : Controller
             return RedirectToAction("Index");
         }
 
-        var resource = _digitalResourceService.GetDigitalResourceById(id);
+        var resource = await _digitalResourceService.GetDigitalResourceByIdAsync(id);
         if (resource == null)
         {
             TempData["Error"] = "Không tìm thấy tài nguyên số!";
@@ -105,7 +109,7 @@ public class DigitalResourceController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Edit(DigitalResource resource)
+    public async System.Threading.Tasks.Task<ActionResult> Edit(DigitalResource resource)
     {
         var user = Session["CurrentUser"] as User;
         if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
@@ -124,7 +128,7 @@ public class DigitalResourceController : Controller
 
         try
         {
-            _digitalResourceService.SaveDigitalResource(resource);
+            await _digitalResourceService.SaveDigitalResourceAsync(resource);
             TempData["Success"] = "Cập nhật tài nguyên số thành công!";
         }
         catch (Exception ex)
@@ -139,7 +143,7 @@ public class DigitalResourceController : Controller
     }
 
     [HttpGet]
-    public ActionResult Delete(int id)
+    public async System.Threading.Tasks.Task<ActionResult> Delete(int id)
     {
         var user = Session["CurrentUser"] as User;
         if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
@@ -151,7 +155,7 @@ public class DigitalResourceController : Controller
 
         try
         {
-            _digitalResourceService.DeleteDigitalResource(id);
+            await _digitalResourceService.DeleteDigitalResourceAsync(id);
             TempData["Success"] = "Xóa tài nguyên số thành công!";
         }
         catch (Exception ex)

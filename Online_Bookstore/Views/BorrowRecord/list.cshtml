@@ -1,72 +1,142 @@
-﻿@model List<BorrowRecord>
+﻿@model List<Online_Bookstore.Models.BorrowRecord>
 @{
-    ViewData["Title"] = "Danh sách phiếu mượn";
-    var currentUser = ViewBag.CurrentUser as User;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Borrow Records";
+    var currentUser = Session["CurrentUser"] as Online_Bookstore.Models.User;
 }
 
-<div class="container mt-4">
-    <h2>Danh sách phiếu mượn</h2>
-
-    @if (ViewBag.Error != null)
-    {
-        <div class="alert alert-danger" role="alert">
-            @ViewBag.Error
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-0">
+                        <i class="fas fa-book-reader me-2 text-primary"></i>Borrow Records
+                    </h1>
+                    <p class="text-muted">Manage book borrowing records and returns</p>
+                </div>
+                @if (currentUser != null && (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN" || currentUser.Role == "MEMBER"))
+                {
+                    <a href="@Url.Action("AddBorrowRecord", "BorrowRecord")" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Borrow Record
+                    </a>
+                }
+            </div>
         </div>
-    }
+    </div>
 
-    @if (ViewBag.Success != null)
-    {
-        <div class="alert alert-success" role="alert">
-            @ViewBag.Success
+    <!-- Borrow Records Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Borrower</th>
+                                    <th>User Code</th>
+                                    <th>Book</th>
+                                    <th>Book Code</th>
+                                    <th>Borrow Date</th>
+                                    <th>Due Date</th>
+                                    <th>Return Date</th>
+                                    <th>Status</th>
+                                    <th>Fine Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    foreach (var record in Model)
+                                    {
+                                        <tr>
+                                            <td><span class="badge bg-secondary">@record.RecordId</span></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-user me-2 text-muted"></i>
+                                                    @record.User?.FullName
+                                                </div>
+                                            </td>
+                                            <td>@record.UserCode</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-book me-2 text-muted"></i>
+                                                    @record.Book?.Title
+                                                </div>
+                                            </td>
+                                            <td><span class="badge bg-info">@record.BookCode</span></td>
+                                            <td>@record.BorrowDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@record.DueDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                @if (record.ReturnDate.HasValue)
+                                                {
+                                                    @record.ReturnDate.Value.ToString("MMM dd, yyyy")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not returned</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var statusClass = record.Status switch
+                                                    {
+                                                        "BORROWED" => "bg-warning",
+                                                        "RETURNED" => "bg-success",
+                                                        "OVERDUE" => "bg-danger",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @statusClass">@record.Status</span>
+                                            </td>
+                                            <td>
+                                                @if (record.FineAmount > 0)
+                                                {
+                                                    <span class="text-danger fw-bold">$@record.FineAmount</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">$0</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (currentUser != null && (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN"))
+                                                {
+                                                    <div class="btn-group" role="group">
+                                                        <a href="@Url.Action("ShowEditForm", "BorrowRecord", new { id = record.RecordId })" 
+                                                           class="btn btn-outline-warning btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="@Url.Action("DeleteBorrowRecord", "BorrowRecord", new { id = record.RecordId })" 
+                                                           class="btn btn-outline-danger btn-sm"
+                                                           onclick="return confirm('Are you sure you want to delete this record?')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="11" class="text-center py-4">
+                                            <i class="fas fa-book-reader fa-3x text-muted mb-3"></i>
+                                            <h5 class="text-muted">No borrow records found</h5>
+                                            <p class="text-muted">Start by adding some borrow records.</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-    }
-
-    @if (currentUser != null &&
-        (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN" || currentUser.Role == "MEMBER"))
-    {
-        <a asp-action="Add" class="btn btn-primary mb-3">Thêm phiếu mượn</a>
-    }
-
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Người mượn</th>
-                <th>Mã người dùng</th>
-                <th>Sách</th>
-                <th>Mã sách</th>
-                <th>Ngày mượn</th>
-                <th>Hạn trả</th>
-                <th>Ngày trả</th>
-                <th>Trạng thái</th>
-                <th>Tiền phạt</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var record in Model)
-            {
-                <tr>
-                    <td>@record.RecordId</td>
-                    <td>@record.User.FullName</td>
-                    <td>@record.UserCode</td>
-                    <td>@record.Book.Title</td>
-                    <td>@record.BookCode</td>
-                    <td>@record.BorrowDate.ToString("yyyy-MM-dd")</td>
-                    <td>@record.DueDate.ToString("yyyy-MM-dd")</td>
-                    <td>@(record.ReturnDate?.ToString("yyyy-MM-dd") ?? "")</td>
-                    <td>@record.Status</td>
-                    <td>@record.FineAmount</td>
-                    <td>
-                        @if (currentUser != null && (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN"))
-                        {
-                            <a asp-action="Edit" asp-route-id="@record.RecordId" class="btn btn-sm btn-warning">Sửa</a>
-                            <a asp-action="Delete" asp-route-id="@record.RecordId" class="btn btn-sm btn-danger"
-                               onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    </div>
 </div>

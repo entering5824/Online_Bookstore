@@ -1,12 +1,13 @@
 ﻿using Online_Bookstore.Models;
 using Online_Bookstore.Repository;
+using Online_Bookstore.Services.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Online_Bookstore.Services
 {
-    public class BookService
+    public class BookService : IBookService
     {
         private readonly IBookRepository _bookRepository;
 
@@ -61,20 +62,48 @@ namespace Online_Bookstore.Services
             return await _bookRepository.FindByCategoryNameAsync(categoryName);
         }
 
-        public async Task<Dictionary<string, long>> GetBooksByCategoryAsync()
+
+        // IBookService interface methods
+        public async Task<List<Book>> FindBooksByCategoryAsync(int categoryId)
+        {
+            var books = await GetAllBooksAsync();
+            return books.Where(b => b.CategoryId == categoryId).ToList();
+        }
+
+        public async Task<List<Book>> SearchBooksAsync(string keyword)
+        {
+            var books = await GetAllBooksAsync();
+            return books.Where(b => 
+                b.Title.Contains(keyword) || 
+                b.Author.Contains(keyword) || 
+                b.Description.Contains(keyword)).ToList();
+        }
+
+        public async Task<List<Book>> GetBooksByAuthorAsync(string author)
+        {
+            return await SearchByAuthorAsync(author);
+        }
+
+        public async Task<List<Book>> GetRecentBooksAsync(int limit)
+        {
+            var books = await GetAllBooksAsync();
+            return books.OrderByDescending(b => b.CreatedAt).Take(limit).ToList();
+        }
+
+        public async Task<Dictionary<string, int>> GetBooksByCategoryAsync()
         {
             var books = await GetAllBooksAsync();
             return books
                 .GroupBy(b => b.Category != null ? b.Category.CategoryName : "Không phân loại")
-                .ToDictionary(g => g.Key, g => (long)g.Count());
+                .ToDictionary(g => g.Key, g => g.Count());
         }
 
-        public async Task<Dictionary<string, long>> GetBooksByAvailabilityAsync()
+        public async Task<Dictionary<string, int>> GetBooksByAvailabilityAsync()
         {
             var books = await GetAllBooksAsync();
             return books
                 .GroupBy(b => b.AvailableCopies > 0 ? "Có sẵn" : "Hết sách")
-                .ToDictionary(g => g.Key, g => (long)g.Count());
+                .ToDictionary(g => g.Key, g => g.Count());
         }
     }
 }

@@ -1,154 +1,165 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using Online_Bookstore.Models;
+using Online_Bookstore.Repository;
 using Online_Bookstore.Services;
-using System.Linq;
+using Online_Bookstore.Services.Interfaces;
 
 namespace Online_Bookstore.Controllers
 {
-public class NotificationController : Controller
-{
-    private readonly INotificationService _notificationService;
-
-    public NotificationController(INotificationService notificationService)
+    public class NotificationController : Controller
     {
-        _notificationService = notificationService;
-    }
+        private readonly INotificationService _notificationService;
 
-    [HttpGet]
-    public ActionResult Index()
-    {
-        var notifications = _notificationService.GetAllNotifications();
-        return View("List", notifications);
-    }
-
-    [HttpGet]
-    public ActionResult Add()
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null)
+        public NotificationController(INotificationService notificationService)
         {
-            TempData["Error"] = "Vui lòng đăng nhập để thực hiện thao tác này!";
-            return RedirectToAction("Index", "Home");
+            _notificationService = notificationService;
         }
-        if (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
-            !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase))
+
+        // Parameterless constructor required by MVC default activator
+        public NotificationController()
         {
-            TempData["NoPermission"] = true;
+            var context = new ApplicationDbContext();
+            var notificationRepository = new NotificationRepository(context);
+            var userRepository = new UserRepository(context);
+            _notificationService = new NotificationService(notificationRepository, userRepository);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Index()
+        {
+            var notifications = await _notificationService.GetAllNotificationsAsync();
+            return View("List", notifications);
+        }
+
+        [HttpGet]
+        public ActionResult Add()
+        {
+            var user = Session["CurrentUser"] as User;
+            if (user == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để thực hiện thao tác này!";
+                return RedirectToAction("Index", "Home");
+            }
+            if (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) &&
+                !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
+
+            return View("Add", new Notification());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Add(Notification notification)
+        {
+            var user = Session["CurrentUser"] as User;
+            if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) &&
+                                !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(notification.Type))
+                    notification.Type = "system";
+                if (notification.IsRead == null)
+                    notification.IsRead = false;
+
+                await _notificationService.SaveNotificationAsync(notification);
+                TempData["Success"] = "Thêm thông báo thành công!";
+            }
+            catch (Exception e)
+            {
+                TempData["Error"] = "Lỗi: " + e.Message;
+                return View("Add", notification);
+            }
+
             return RedirectToAction("Index");
         }
 
-        return View("Add", new Notification());
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Add(Notification notification)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
-                            !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
+        [HttpGet]
+        public async Task<ActionResult> Edit(int id)
         {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
-        }
+            var user = Session["CurrentUser"] as User;
+            if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) &&
+                                !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
 
-        try
-        {
-            if (string.IsNullOrWhiteSpace(notification.Type))
-                notification.Type = "system";
-            if (notification.IsRead == null)
-                notification.IsRead = false;
+            var notification = await _notificationService.GetNotificationByIdAsync(id);
+            if (notification == null)
+            {
+                TempData["Error"] = "Không tìm thấy thông báo!";
+                return RedirectToAction("Index");
+            }
 
-            _notificationService.SaveNotification(notification);
-            TempData["Success"] = "Thêm thông báo thành công!";
-        }
-        catch (Exception e)
-        {
-            TempData["Error"] = "Lỗi: " + e.Message;
-            return View("Add", notification);
-        }
-
-        return RedirectToAction("Index");
-    }
-
-    [HttpGet]
-    public ActionResult Edit(int id)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
-                            !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
-        {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
-        }
-
-        var notification = _notificationService.GetNotificationById(id);
-        if (notification == null)
-        {
-            TempData["Error"] = "Không tìm thấy thông báo!";
-            return RedirectToAction("Index");
-        }
-
-        return View("Edit", notification);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Edit(Notification notification)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
-                            !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
-        {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index");
-        }
-
-        if (!ModelState.IsValid)
-        {
             return View("Edit", notification);
         }
 
-        try
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(Notification notification)
         {
-            if (string.IsNullOrWhiteSpace(notification.Type))
-                notification.Type = "system";
+            var user = Session["CurrentUser"] as User;
+            if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) &&
+                                !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
 
-            _notificationService.SaveNotification(notification);
-            TempData["Success"] = "Cập nhật thông báo thành công!";
-        }
-        catch (Exception e)
-        {
-            TempData["Error"] = "Lỗi: " + e.Message;
-            return View("Edit", notification);
-        }
+            if (!ModelState.IsValid)
+            {
+                return View("Edit", notification);
+            }
 
-        return RedirectToAction("Index");
-    }
+            try
+            {
+                if (string.IsNullOrWhiteSpace(notification.Type))
+                    notification.Type = "system";
 
-    [HttpGet]
-    public ActionResult Delete(int id)
-    {
-        var user = Session["CurrentUser"] as User;
-        if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && 
-                            !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
-        {
-            TempData["NoPermission"] = true;
+                await _notificationService.SaveNotificationAsync(notification);
+                TempData["Success"] = "Cập nhật thông báo thành công!";
+            }
+            catch (Exception e)
+            {
+                TempData["Error"] = "Lỗi: " + e.Message;
+                return View("Edit", notification);
+            }
+
             return RedirectToAction("Index");
         }
 
-        try
+        [HttpGet]
+        public async Task<ActionResult> Delete(int id)
         {
-            _notificationService.DeleteNotification(id);
-            TempData["Success"] = "Xóa thông báo thành công!";
-        }
-        catch (Exception e)
-        {
-            TempData["Error"] = "Lỗi: " + e.Message;
-        }
+            var user = Session["CurrentUser"] as User;
+            if (user == null || (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) &&
+                                !user.Role.Equals("LIBRARIAN", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["NoPermission"] = true;
+                return RedirectToAction("Index");
+            }
 
-        return RedirectToAction("Index");
+            try
+            {
+                await _notificationService.DeleteNotificationAsync(id);
+                TempData["Success"] = "Xóa thông báo thành công!";
+            }
+            catch (Exception e)
+            {
+                TempData["Error"] = "Lỗi: " + e.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
     }
-}
 }

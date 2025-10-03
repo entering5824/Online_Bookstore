@@ -1,7 +1,7 @@
-﻿using Online_Bookstore.Models;
+﻿using System.Linq;
+using Online_Bookstore.Models;
 using Online_Bookstore.Services;
 using Online_Bookstore.Utils;
-using OnlineBookstore.Services;
 using System;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -23,6 +23,11 @@ public class BorrowRecordController : Controller
         _borrowRecordService = borrowRecordService;
         _userService = userService;
         _bookService = bookService;
+}
+
+    // Parameterless constructor required by MVC default activator
+    public BorrowRecordController()
+    {
     }
 
     [HttpGet, Route("")]
@@ -81,45 +86,46 @@ public class BorrowRecordController : Controller
             return View("layout/main");
         }
 
-        try
-        {
-            int targetUserId = userId;
-            if (currentUser.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                if (!currentUser.UserId.HasValue)
+                int targetUserId = userId;
+                if (currentUser.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase))
                 {
-                    TempData["Error"] = "Không thể xác định người dùng!";
-                    return RedirectToAction("ListBorrowRecords");
+                    if (currentUser.UserId <= 0)
+                    {
+                        TempData["Error"] = "Không thể xác định người dùng!";
+                        return RedirectToAction("ListBorrowRecords");
+                    }
+                    targetUserId = currentUser.UserId;
+
+
+                    DateTime borrowDt = !string.IsNullOrEmpty(borrowDate) ? DateTime.Parse(borrowDate) : DateTime.Now;
+                    DateTime? dueDt = !string.IsNullOrEmpty(dueDate) ? DateTime.Parse(dueDate) : (DateTime?)null;
+
+                    foreach (var bookId in bookIds)
+                    {
+                        var record = new BorrowRecord
+                        {
+                            User = await _userService.GetUserByIdAsync(targetUserId),
+                            Book = await _bookService.GetBookByIdAsync(bookId),
+                            BorrowDate = borrowDt,
+                            DueDate = dueDt,
+                            Status = string.IsNullOrWhiteSpace(status) ? "Đang mượn" : status
+                        };
+                        await _borrowRecordService.SaveBorrowRecordAsync(record);
+                    }
+                    TempData["Success"] = "Thêm phiếu mượn thành công!";
                 }
-                targetUserId = currentUser.UserId.Value;
             }
-
-            DateTime borrowDt = !string.IsNullOrEmpty(borrowDate) ? DateTime.Parse(borrowDate) : DateTime.Now;
-            DateTime? dueDt = !string.IsNullOrEmpty(dueDate) ? DateTime.Parse(dueDate) : (DateTime?)null;
-
-            foreach (var bookId in bookIds)
+            catch (Exception ex)
             {
-                var record = new BorrowRecord
-                {
-                    User = await _userService.GetUserByIdAsync(targetUserId),
-                    Book = await _bookService.GetBookByIdAsync(bookId),
-                    BorrowDate = borrowDt,
-                    DueDate = dueDt,
-                    Status = string.IsNullOrWhiteSpace(status) ? "Đang mượn" : status
-                };
-                await _borrowRecordService.SaveBorrowRecordAsync(record);
+                TempData["Error"] = "Lỗi: " + ex.Message;
+                ViewBag.Record = new BorrowRecord();
+                ViewBag.Users = await _userService.GetAllUsersAsync();
+                ViewBag.Books = await _bookService.GetAllBooksAsync();
+                ViewBag.Content = "borrowrecord/add.cshtml";
+                return View("layout/main");
             }
-            TempData["Success"] = "Thêm phiếu mượn thành công!";
-        }
-        catch (Exception ex)
-        {
-            TempData["Error"] = "Lỗi: " + ex.Message;
-            ViewBag.Record = new BorrowRecord();
-            ViewBag.Users = await _userService.GetAllUsersAsync();
-            ViewBag.Books = await _bookService.GetAllBooksAsync();
-            ViewBag.Content = "borrowrecord/add.cshtml";
-            return View("layout/main");
-        }
 
         return RedirectToAction("ListBorrowRecords");
     }

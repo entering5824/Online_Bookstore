@@ -19,9 +19,20 @@ namespace Online_Bookstore.Services
             return await _bookCategoryRepository.GetAllAsync();
         }
 
+        // Synchronous wrappers for legacy controller calls
+        public List<BookCategory> GetAllCategories()
+        {
+            return GetAllCategoriesAsync().GetAwaiter().GetResult();
+        }
+
         public async Task<BookCategory> GetCategoryByIdAsync(int id)
         {
             return await _bookCategoryRepository.GetByIdAsync(id);
+        }
+
+        public BookCategory GetCategoryById(int id)
+        {
+            return GetCategoryByIdAsync(id).GetAwaiter().GetResult();
         }
 
         public async Task SaveCategoryAsync(BookCategory category)
@@ -29,9 +40,19 @@ namespace Online_Bookstore.Services
             await _bookCategoryRepository.SaveAsync(category);
         }
 
+        public void SaveCategory(BookCategory category)
+        {
+            SaveCategoryAsync(category).GetAwaiter().GetResult();
+        }
+
         public async Task DeleteCategoryAsync(int id)
         {
             await _bookCategoryRepository.DeleteAsync(id);
+        }
+
+        public void DeleteCategory(int id)
+        {
+            DeleteCategoryAsync(id).GetAwaiter().GetResult();
         }
 
         public async Task<BookCategory> FindByCategoryNameAsync(string name)

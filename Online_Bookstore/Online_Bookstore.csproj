@@ -303,6 +303,7 @@
     <Compile Include="Controllers\StatisticsController.cs" />
     <Compile Include="Controllers\SystemSettingController.cs" />
     <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Exceptions\ResourceNotFoundException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -312,6 +313,7 @@
     <Compile Include="Models\BookCategory.cs" />
     <Compile Include="Models\BorrowRecord.cs" />
     <Compile Include="Models\DigitalResource.cs" />
+    <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Notification.cs" />
     <Compile Include="Models\Reservation.cs" />
     <Compile Include="Models\SystemSetting.cs" />
@@ -334,6 +336,7 @@
     <Compile Include="Services\EmailService.cs" />
     <Compile Include="Services\Interfaces\IActivityLogService.cs" />
     <Compile Include="Services\Interfaces\IBookCategoryService.cs" />
+    <Compile Include="Services\Interfaces\IBookService.cs" />
     <Compile Include="Services\Interfaces\IBorrowRecordService.cs" />
     <Compile Include="Services\Interfaces\IDigitalResourceService.cs" />
     <Compile Include="Services\Interfaces\INotificationService.cs" />
@@ -345,6 +348,7 @@
     <Compile Include="Services\SystemSettingService.cs" />
     <Compile Include="Services\UserService.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Utils\CommonCrypto.cs" />
     <Compile Include="Utils\SessionExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -433,6 +437,7 @@
     <Content Include="Views\SystemSetting\edit.cshtml" />
     <Content Include="Views\SystemSetting\list.cshtml" />
     <Content Include="Views\Statistics\dashboard.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

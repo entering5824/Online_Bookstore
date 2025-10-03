@@ -1,5 +1,6 @@
 ﻿using Online_Bookstore.Models;
 using Online_Bookstore.Repository;
+using Online_Bookstore.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Online_Bookstore.Services
 {
-    public class BorrowRecordService
+    public class BorrowRecordService : IBorrowRecordService
     {
         private readonly BorrowRecordRepository _borrowRecordRepository;
         private readonly UserRepository _userRepository;
