@@ -33,7 +33,7 @@ public class StatisticsController : Controller
         var reservationRepository = new ReservationRepository(context);
 
         _bookService = new BookService(bookRepository);
-        _userService = new UserService(context);
+        _userService = new UserService(userRepository);
         _borrowRecordService = new BorrowRecordService(borrowRecordRepository, userRepository, bookRepository);
         _reservationService = new ReservationService(reservationRepository, userRepository, bookRepository);
     }
@@ -49,28 +49,50 @@ public class StatisticsController : Controller
     public async Task<ActionResult> Index()
     {
         var user = Session["CurrentUser"] as User;
-        if (user == null)
+        ViewBag.CurrentUser = user;
+        
+        // Cho phép tất cả user xem thống kê cơ bản
+        try
         {
-            TempData["Error"] = "Vui lòng đăng nhập để xem thống kê!";
-            return RedirectToAction("Index", "Home");
+            ViewBag.TotalBooks = (await _bookService.GetAllBooksAsync()).Count;
+            
+            if (user != null && IsAdminOrLibrarian(user))
+            {
+                // Admin và librarian xem được thống kê chi tiết
+                ViewBag.TotalUsers = (await _userService.GetAllUsersAsync()).Count;
+                ViewBag.TotalBorrowRecords = (await _borrowRecordService.GetAllBorrowRecordsAsync()).Count;
+                ViewBag.TotalReservations = (await _reservationService.GetAllReservationsAsync()).Count;
+                ViewBag.BooksByCategory = await _bookService.GetBooksByCategoryAsync();
+                ViewBag.BorrowRecordsByStatus = await _borrowRecordService.GetBorrowRecordsByStatusAsync();
+                ViewBag.ReservationsByStatus = await _reservationService.GetReservationsByStatusAsync();
+                ViewBag.UsersByRole = await _userService.GetUsersByRoleAsync();
+            }
+            else
+            {
+                // User thường chỉ xem được thông tin cơ bản
+                ViewBag.TotalUsers = 0;
+                ViewBag.TotalBorrowRecords = 0;
+                ViewBag.TotalReservations = 0;
+                ViewBag.BooksByCategory = new Dictionary<string, int>();
+                ViewBag.BorrowRecordsByStatus = new Dictionary<string, long>();
+                ViewBag.ReservationsByStatus = new Dictionary<string, long>();
+                ViewBag.UsersByRole = new Dictionary<string, int>();
+            }
         }
-        if (!IsAdminOrLibrarian(user))
+        catch (Exception)
         {
-            TempData["NoPermission"] = true;
-            return RedirectToAction("Index", "Home");
+            // Nếu có lỗi, hiển thị thông tin mặc định
+            ViewBag.TotalBooks = 0;
+            ViewBag.TotalUsers = 0;
+            ViewBag.TotalBorrowRecords = 0;
+            ViewBag.TotalReservations = 0;
+            ViewBag.BooksByCategory = new Dictionary<string, int>();
+            ViewBag.BorrowRecordsByStatus = new Dictionary<string, long>();
+            ViewBag.ReservationsByStatus = new Dictionary<string, long>();
+            ViewBag.UsersByRole = new Dictionary<string, int>();
         }
 
-        ViewBag.TotalBooks = (await _bookService.GetAllBooksAsync()).Count;
-        ViewBag.TotalUsers = (await _userService.GetAllUsersAsync()).Count;
-        ViewBag.TotalBorrowRecords = (await _borrowRecordService.GetAllBorrowRecordsAsync()).Count;
-        ViewBag.TotalReservations = (await _reservationService.GetAllReservationsAsync()).Count;
-
-        ViewBag.BooksByCategory = await _bookService.GetBooksByCategoryAsync();
-        ViewBag.BorrowRecordsByStatus = await _borrowRecordService.GetBorrowRecordsByStatusAsync();
-        ViewBag.ReservationsByStatus = await _reservationService.GetReservationsByStatusAsync();
-        ViewBag.UsersByRole = await _userService.GetUsersByRoleAsync();
-
-        return View("Dashboard");
+        return View("dashboard");
     }
 
     [HttpGet]

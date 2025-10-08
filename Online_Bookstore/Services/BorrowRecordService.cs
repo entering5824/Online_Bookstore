@@ -26,7 +26,20 @@ namespace Online_Bookstore.Services
 
         public async Task<List<BorrowRecord>> GetAllBorrowRecordsAsync()
         {
-            return await _borrowRecordRepository.GetAllAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔍 BorrowRecordService.GetAllBorrowRecordsAsync: Starting...");
+                var result = await _borrowRecordRepository.GetAllAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ BorrowRecordService.GetAllBorrowRecordsAsync: Successfully loaded {result.Count} borrow records");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Lỗi trong GetAllBorrowRecordsAsync: " + ex.Message);
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine("Inner: " + ex.InnerException.Message);
+                throw;
+            }
         }
 
         public async Task<BorrowRecord> GetBorrowRecordByIdAsync(int id)
@@ -39,21 +52,15 @@ namespace Online_Bookstore.Services
 
         public async Task SaveBorrowRecordAsync(BorrowRecord record)
         {
-            if (record.UserId.HasValue)
-            {
-                var user = await _userRepository.GetByIdAsync(record.UserId.Value);
-                if (user == null)
-                    throw new Exception($"Không tìm thấy người dùng với ID: {record.UserId}");
-                record.User = user;
-            }
+            var user = await _userRepository.GetByIdAsync(record.UserId);
+            if (user == null)
+                throw new Exception($"Không tìm thấy người dùng với ID: {record.UserId}");
+            record.User = user;
 
-            if (record.BookId.HasValue)
-            {
-                var book = await _bookRepository.GetByIdAsync(record.BookId.Value);
-                if (book == null)
-                    throw new Exception($"Không tìm thấy sách với ID: {record.BookId}");
-                record.Book = book;
-            }
+            var book = await _bookRepository.GetByIdAsync(record.BookId);
+            if (book == null)
+                throw new Exception($"Không tìm thấy sách với ID: {record.BookId}");
+            record.Book = book;
 
             await _borrowRecordRepository.SaveAsync(record);
         }
@@ -65,15 +72,7 @@ namespace Online_Bookstore.Services
 
         public async Task<List<(Book, int)>> GetTopBorrowedBooksAsync(int limit)
         {
-            var records = await _borrowRecordRepository.GetAllAsync();
-            var topBooks = records
-                .Where(r => r.Book != null)
-                .GroupBy(r => r.Book)
-                .Select(g => new { Book = g.Key, Count = g.Count() })
-                .OrderByDescending(x => x.Count)
-                .Take(limit)
-                .ToList();
-            return topBooks.Select(x => (x.Book, x.Count)).ToList();
+            return await _borrowRecordRepository.GetTopBorrowedBooksAsync();
         }
 
         public async Task<Dictionary<string, long>> GetBorrowRecordsByStatusAsync()
@@ -100,8 +99,7 @@ namespace Online_Bookstore.Services
         {
             var records = await GetAllBorrowRecordsAsync();
             return records
-                .Where(r => r.BorrowDate.HasValue)
-                .GroupBy(r => r.BorrowDate.Value.ToString("yyyy-MM"))
+                .GroupBy(r => r.BorrowDate.ToString("yyyy-MM"))
                 .ToDictionary(g => g.Key, g => (long)g.Count());
         }
 
@@ -110,7 +108,7 @@ namespace Online_Bookstore.Services
             var now = DateTime.Now;
             var records = await _borrowRecordRepository.GetAllAsync();
             return records
-                .Where(r => r.DueDate.HasValue && r.DueDate.Value < now && (string.IsNullOrEmpty(r.Status) || r.Status == "Đang mượn"))
+                .Where(r => r.DueDate < now && (string.IsNullOrEmpty(r.Status) || r.Status == "Đang mượn"))
                 .ToList();
         }
     }

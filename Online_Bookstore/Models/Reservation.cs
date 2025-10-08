@@ -5,42 +5,50 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Online_Bookstore.Models
 {
-    [Table("reservations")]
-
+    [Table("Reservations")]
     public class Reservation
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("reservation_id")]
-        public int ReservationId { get; set; }
+        [Column("Id")]
+        public int Id { get; set; }
 
         [ForeignKey("User")]
-        [Column("user_id")]
-        public int? UserId { get; set; }
+        [Column("UserId")]
+        public int UserId { get; set; }
         public virtual User User { get; set; }
 
-        [Column("user_code", TypeName = "nvarchar(20)")]
-        [MaxLength(20)]
+        [Column("UserCode")]
+        [StringLength(20)]
         public string UserCode { get; set; }
 
         [ForeignKey("Book")]
-        [Column("book_id")]
-        public int? BookId { get; set; }
+        [Column("BookId")]
+        public int BookId { get; set; }
         public virtual Book Book { get; set; }
 
-        [Column("book_code", TypeName = "nvarchar(20)")]
-        [MaxLength(20)]
+        [Column("BookCode")]
+        [StringLength(20)]
         public string BookCode { get; set; }
 
-        [Column("reservation_date")]
-        public DateTime? ReservationDate { get; set; }
+        [Column("ReservationDate")]
+        public DateTime ReservationDate { get; set; }
 
-        [Column("expiry_date")]
-        public DateTime? ExpiryDate { get; set; }
+        [Column("ExpiryDate")]
+        public DateTime ExpiryDate { get; set; }
 
-        [Column("status", TypeName = "nvarchar(20)")]
-        [MaxLength(20)]
+        [Column("Status")]
+        [StringLength(20)]
         public string Status { get; set; }
+
+        [Column("Notes")]
+        public string Notes { get; set; }
+
+        [Column("CreatedDate")]
+        public DateTime CreatedDate { get; set; }
+
+        [Column("UpdatedDate")]
+        public DateTime UpdatedDate { get; set; }
 
     }
 }

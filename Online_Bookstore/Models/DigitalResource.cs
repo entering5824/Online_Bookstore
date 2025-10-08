@@ -5,46 +5,65 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Online_Bookstore.Models
 {
-    [Table("digital_resources")]
-
+    [Table("DigitalResources")]
     public class DigitalResource
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("resource_id")]
+        [Column("Id")]
         public int ResourceId { get; set; }
 
+        [Required]
+        [StringLength(200)]
+        [Column("Title")]
+        public string Title { get; set; }
+
+        [Column("Description")]
+        public string Description { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        [Column("FileUrl")]
+        public string FileUrl { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        [Column("FileType")]
+        public string FileType { get; set; }
+
+        [Column("FileSize")]
+        public long? FileSize { get; set; }
+
+        [Column("Category")]
+        public string Category { get; set; }
+
+        [Column("Tags")]
+        public string Tags { get; set; }
+
+        [Column("CreatedDate")]
+        public DateTime CreatedDate { get; set; }
+
+        [Column("UpdatedDate")]
+        public DateTime UpdatedDate { get; set; }
+
+        [Column("IsActive")]
+        public bool IsActive { get; set; }
+
+        [Column("DownloadCount")]
+        public int DownloadCount { get; set; }
+
         [ForeignKey("Book")]
-        [Column("book_id")]
+        [Column("BookId")]
         public int? BookId { get; set; }
         public virtual Book Book { get; set; }
 
         [StringLength(20)]
-        [Column("book_code")]
+        [Column("BookCode")]
         public string BookCode { get; set; }
 
-        [Required]
-        [StringLength(255)]
-        [Column("title")]
-        public string Title { get; set; }
-
-        [StringLength(100)]
-        [Column("format")]
-        public string Format { get; set; }
-
-        [Column("file_size")]
-        public long? FileSize { get; set; }
-
-        [StringLength(255)]
-        [Column("file_url")]
-        public string FileUrl { get; set; }
-
-        [Column("upload_date")]
-        public DateTime? UploadDate { get; set; }
-
         [StringLength(20)]
-        [Column("status")]
-        public string Status { get; set; }
+        [Column("AccessLevel")]
+        public string AccessLevel { get; set; }
 
     }
 }

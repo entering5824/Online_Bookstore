@@ -1,6 +1,7 @@
 ﻿using Online_Bookstore.Models;
 using Online_Bookstore.Repository;
 using Online_Bookstore.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +19,20 @@ namespace Online_Bookstore.Services
 
         public async Task<List<Book>> GetAllBooksAsync()
         {
-            return await _bookRepository.GetAllAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔍 BookService.GetAllBooksAsync: Starting...");
+                var result = await _bookRepository.GetAllAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ BookService.GetAllBooksAsync: Successfully loaded {result.Count} books");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Lỗi trong GetAllBooksAsync: " + ex.Message);
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine("Inner: " + ex.InnerException.Message);
+                throw;
+            }
         }
 
         public async Task<Book> GetBookByIdAsync(int id)
@@ -66,17 +80,23 @@ namespace Online_Bookstore.Services
         // IBookService interface methods
         public async Task<List<Book>> FindBooksByCategoryAsync(int categoryId)
         {
-            var books = await GetAllBooksAsync();
-            return books.Where(b => b.CategoryId == categoryId).ToList();
+            // Fallback to existing method - will be optimized later
+            return await SearchByCategoryAsync(categoryId.ToString());
         }
 
         public async Task<List<Book>> SearchBooksAsync(string keyword)
         {
-            var books = await GetAllBooksAsync();
-            return books.Where(b => 
-                b.Title.Contains(keyword) || 
-                b.Author.Contains(keyword) || 
-                b.Description.Contains(keyword)).ToList();
+            // Fallback to existing method - will be optimized later
+            var titleResults = await SearchByTitleAsync(keyword);
+            var authorResults = await SearchByAuthorAsync(keyword);
+            
+            // Combine and remove duplicates
+            var allResults = titleResults.Concat(authorResults)
+                .GroupBy(b => b.BookId)
+                .Select(g => g.First())
+                .ToList();
+                
+            return allResults;
         }
 
         public async Task<List<Book>> GetBooksByAuthorAsync(string author)
@@ -86,12 +106,14 @@ namespace Online_Bookstore.Services
 
         public async Task<List<Book>> GetRecentBooksAsync(int limit)
         {
+            // Temporarily use existing method - will be optimized later
             var books = await GetAllBooksAsync();
-            return books.OrderByDescending(b => b.CreatedAt).Take(limit).ToList();
+            return books.OrderByDescending(b => b.CreatedDate).Take(limit).ToList();
         }
 
         public async Task<Dictionary<string, int>> GetBooksByCategoryAsync()
         {
+            // Temporarily use existing method - will be optimized later
             var books = await GetAllBooksAsync();
             return books
                 .GroupBy(b => b.Category != null ? b.Category.CategoryName : "Không phân loại")
@@ -100,6 +122,7 @@ namespace Online_Bookstore.Services
 
         public async Task<Dictionary<string, int>> GetBooksByAvailabilityAsync()
         {
+            // Temporarily use existing method - will be optimized later
             var books = await GetAllBooksAsync();
             return books
                 .GroupBy(b => b.AvailableCopies > 0 ? "Có sẵn" : "Hết sách")

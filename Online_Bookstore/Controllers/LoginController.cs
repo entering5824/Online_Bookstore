@@ -2,6 +2,7 @@
 using Online_Bookstore.Services;
 using Online_Bookstore.Services.Interfaces;
 using Online_Bookstore.Utils;
+using Online_Bookstore.Repository;
 using System;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -21,13 +22,20 @@ namespace Online_Bookstore.Controllers
     public LoginController()
     {
         var context = new ApplicationDbContext();
-        _userService = new UserService(context);
+        var userRepository = new UserRepository(context);
+        _userService = new UserService(userRepository);
     }
 
     [HttpGet]
     public ActionResult Login()
     {
-        return View("~/Views/Account/Login.cshtml");
+        return View("~/Views/Account/login.cshtml");
+    }
+
+    [HttpGet]
+    public ActionResult Register()
+    {
+        return View("~/Views/Account/register.cshtml");
     }
 
     [HttpPost]

@@ -7,74 +7,74 @@ using System.Web;
 
 namespace Online_Bookstore.Models
 {
-    [Table("books")]
+    [Table("Books")]
 
     public class Book
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("book_id")]
+        [Column("Id")]
         public int BookId { get; set; }
 
-        [Column("book_code")]
+        [Column("BookCode")]
         [StringLength(20)]
         public string BookCode { get; set; }
 
         [Required]
         [StringLength(255)]
-        [Column("title")]
+        [Column("Title")]
         public string Title { get; set; }
 
         [StringLength(100)]
-        [Column("author")]
+        [Column("Author")]
         public string Author { get; set; }
 
-        [Column("publication_year")]
+        [Column("PublicationYear")]
         public int? PublicationYear { get; set; }
 
         [StringLength(50)]
-        [Column("isbn")]
+        [Column("ISBN")]
         public string Isbn { get; set; }
 
-        [Column("total_copies")]
+        [Column("Quantity")]
         public int? TotalCopies { get; set; }
 
-        [Column("available_copies")]
+        [Column("AvailableQuantity")]
         public int? AvailableCopies { get; set; }
 
         [ForeignKey("Category")]
-        [Column("category_id")]
+        [Column("CategoryId")]
         public int? CategoryId { get; set; }
 
         public virtual BookCategory Category { get; set; }
 
         [StringLength(50)]
-        [Column("publisher")]
+        [Column("Publisher")]
         public string Publisher { get; set; }
 
         [StringLength(20)]
-        [Column("language")]
+        [Column("Language")]
         public string Language { get; set; }
 
         [StringLength(500)]
-        [Column("description")]
+        [Column("Description")]
         public string Description { get; set; }
 
-        [Column("created_at")]
-        public DateTime? CreatedAt { get; set; }
+        [Column("CreatedDate")]
+        public DateTime CreatedDate { get; set; }
 
-        [Column("updated_at")]
-        public DateTime? UpdatedAt { get; set; }
+        [Column("UpdatedDate")]
+        public DateTime UpdatedDate { get; set; }
 
         [StringLength(255)]
-        [Column("cover_image_url")]
+        [Column("CoverImageUrl")]
         public string CoverImageUrl { get; set; }
 
-        [Column("is_digital")]
+        [Column("IsDigital")]
         public bool? IsDigital { get; set; }
 
         [StringLength(255)]
-        [Column("qr_code")]
+        [Column("QRCode")]
         public string QrCode { get; set; }
 
     }

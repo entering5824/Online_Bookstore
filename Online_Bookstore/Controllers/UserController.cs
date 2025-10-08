@@ -5,6 +5,8 @@ using Online_Bookstore.Utils;
 using System.Web.Mvc;
 using Online_Bookstore.Models;
 using Online_Bookstore.Services.Interfaces;
+using Online_Bookstore.Services;
+using Online_Bookstore.Repository;
 
 namespace Online_Bookstore.Controllers
 {
@@ -20,6 +22,9 @@ namespace Online_Bookstore.Controllers
         // Parameterless constructor required by MVC default activator
         public UserController()
         {
+            var context = new ApplicationDbContext();
+            var userRepository = new UserRepository(context);
+            _userService = new UserService(userRepository);
         }
 
         private bool IsAdmin(User user) =>
@@ -128,7 +133,7 @@ namespace Online_Bookstore.Controllers
                 return View("Edit");
             }
 
-            if (await _userService.GetUserByIdAsync(user.UserId) == null)
+            if (await _userService.GetUserByIdAsync(user.Id) == null)
             {
                 TempData["Error"] = "Không tìm thấy người dùng!";
                 return RedirectToAction("Index");

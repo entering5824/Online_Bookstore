@@ -1,0 +1,10 @@
+{
+  "autofix": {
+    "enabled": true,
+    "timeoutMinutes": 20,
+    "retryCount": 5,
+    "buildCommand": "\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe\" Online_Bookstore.sln /p:Configuration=Debug",
+    "runTests": "RunTests.bat",
+    "commitIfPass": true
+  }
+}

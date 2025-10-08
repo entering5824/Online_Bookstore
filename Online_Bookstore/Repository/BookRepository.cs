@@ -1,4 +1,5 @@
 ﻿using Online_Bookstore.Models;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -29,7 +30,29 @@ namespace Online_Bookstore.Repository
 
         public async Task<List<Book>> GetAllAsync()
         {
-            return await _context.Books.Include(b => b.Category).ToListAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔍 BookRepository.GetAllAsync: Starting...");
+                
+                // First try without Include to isolate the issue
+                System.Diagnostics.Debug.WriteLine("🔍 BookRepository.GetAllAsync: Attempting to load Books without Category...");
+                var result = await _context.Books.ToListAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ BookRepository.GetAllAsync: Successfully loaded {result.Count} books without Category");
+                
+                // If successful, try with Include
+                System.Diagnostics.Debug.WriteLine("🔍 BookRepository.GetAllAsync: Attempting to load Books with Category...");
+                var resultWithCategory = await _context.Books.Include(b => b.Category).ToListAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ BookRepository.GetAllAsync: Successfully loaded {resultWithCategory.Count} books with Category");
+                
+                return resultWithCategory;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Lỗi trong BookRepository.GetAllAsync: " + ex.Message);
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine("Inner: " + ex.InnerException.Message);
+                throw;
+            }
         }
 
         public async Task<Book> GetByIdAsync(int id)

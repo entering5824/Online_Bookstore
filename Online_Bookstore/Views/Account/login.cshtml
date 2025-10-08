@@ -4,49 +4,159 @@
     var error = ViewBag.Error;
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-lg">
-            <div class="card-body padding-medium">
-                <div class="text-center mb-4">
-                    <h2 class="text-primary">📚 Login</h2>
-                    <p class="text-muted">Welcome back to Online Bookstore</p>
+<div class="auth-container">
+    <div class="row justify-content-center align-items-center min-vh-75">
+        <div class="col-md-8 col-lg-6">
+            <!-- Login Card -->
+            <div class="card auth-card shadow-lg fade-in" id="loginCard">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="auth-icon mb-3">
+                            <i class="fas fa-book-open fa-3x text-primary"></i>
+                        </div>
+                        <h2 class="auth-title">Welcome Back</h2>
+                        <p class="text-muted">Sign in to your Online Bookstore account</p>
+                    </div>
+                    
+                    @using (Html.BeginForm("Login", "Login", FormMethod.Post, new { @class = "needs-validation auth-form", novalidate = "novalidate" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user me-2"></i>Username or Email
+                            </label>
+                            <input type="text" name="username" id="username" class="form-control form-control-lg" 
+                                   placeholder="Enter your username or email" required autofocus />
+                            <div class="invalid-feedback">
+                                Please enter your username or email.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control form-control-lg" 
+                                       placeholder="Enter your password" required />
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                Please enter your password.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" id="loginBtn">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                        
+                        <div class="text-center">
+                            <p class="mb-2">
+                                <a href="@Url.Action("Register", "Login")" class="text-decoration-none auth-link" onclick="showRegister()">
+                                    <i class="fas fa-user-plus me-1"></i>Create Account
+                                </a>
+                            </p>
+                            <p class="mb-0">
+                                <a href="@Url.Action("ForgotPassword", "Login")" class="text-decoration-none auth-link">
+                                    <i class="fas fa-key me-1"></i>Forgot Password?
+                                </a>
+                            </p>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(error))
+                    {
+                        <div class="alert alert-danger mt-4 fade-in" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>@error
+                        </div>
+                    }
                 </div>
-                
-                @using (Html.BeginForm("Login", "Login", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate" }))
-                {
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" name="username" id="username" class="form-control" required autofocus />
-                        <div class="invalid-feedback">
-                            Please enter your username.
+            </div>
+
+            <!-- Register Card (Hidden by default) -->
+            <div class="card auth-card shadow-lg fade-in d-none" id="registerCard">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="auth-icon mb-3">
+                            <i class="fas fa-user-plus fa-3x text-success"></i>
                         </div>
+                        <h2 class="auth-title">Create Account</h2>
+                        <p class="text-muted">Join Online Bookstore today</p>
                     </div>
                     
-                    <div class="mb-4">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" name="password" id="password" class="form-control" required />
-                        <div class="invalid-feedback">
-                            Please enter your password.
+                    @using (Html.BeginForm("Register", "Login", FormMethod.Post, new { @class = "needs-validation auth-form", novalidate = "novalidate" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">
+                                <i class="fas fa-id-card me-2"></i>Full Name
+                            </label>
+                            <input type="text" name="fullName" id="fullName" class="form-control form-control-lg" 
+                                   placeholder="Enter your full name" required />
+                            <div class="invalid-feedback">
+                                Please enter your full name.
+                            </div>
                         </div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary w-100 mb-3">
-                        <i class="fas fa-sign-in-alt me-2"></i>Login
-                    </button>
-                    
-                    <div class="text-center">
-                        <a href="@Url.Action("Register", "Login")" class="text-decoration-none me-3">Register</a>
-                        <a href="@Url.Action("ForgotPassword", "Login")" class="text-decoration-none">Forgot Password?</a>
-                    </div>
-                }
-                
-                @if (!string.IsNullOrEmpty(error))
-                {
-                    <div class="alert alert-danger mt-3" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>@error
-                    </div>
-                }
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>Email
+                            </label>
+                            <input type="email" name="email" id="email" class="form-control form-control-lg" 
+                                   placeholder="Enter your email" required />
+                            <div class="invalid-feedback">
+                                Please enter a valid email.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="regUsername" class="form-label">
+                                <i class="fas fa-user me-2"></i>Username
+                            </label>
+                            <input type="text" name="username" id="regUsername" class="form-control form-control-lg" 
+                                   placeholder="Choose a username" required />
+                            <div class="invalid-feedback">
+                                Please choose a username.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="regPassword" class="form-label">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <input type="password" name="password" id="regPassword" class="form-control form-control-lg" 
+                                   placeholder="Create a password" required />
+                            <div class="invalid-feedback">
+                                Please create a password.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="confirmPassword" class="form-label">
+                                <i class="fas fa-lock me-2"></i>Confirm Password
+                            </label>
+                            <input type="password" name="confirmPassword" id="confirmPassword" class="form-control form-control-lg" 
+                                   placeholder="Confirm your password" required />
+                            <div class="invalid-feedback">
+                                Please confirm your password.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">
+                                <a href="#" class="text-decoration-none auth-link" onclick="showLogin()">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Already have an account? Sign In
+                                </a>
+                            </p>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -69,4 +179,80 @@
             });
         }, false);
     })();
+
+    // Toggle password visibility
+    function togglePassword() {
+        const passwordField = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.className = 'fas fa-eye-slash';
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.className = 'fas fa-eye';
+        }
+    }
+
+    // Show register form
+    function showRegister() {
+        document.getElementById('loginCard').classList.add('d-none');
+        document.getElementById('registerCard').classList.remove('d-none');
+        
+        // Animate cards
+        const registerCard = document.getElementById('registerCard');
+        registerCard.style.opacity = '0';
+        registerCard.style.transform = 'translateX(100px)';
+        
+        setTimeout(() => {
+            registerCard.style.transition = 'all 0.3s ease';
+            registerCard.style.opacity = '1';
+            registerCard.style.transform = 'translateX(0)';
+        }, 50);
+    }
+
+    // Show login form
+    function showLogin() {
+        document.getElementById('registerCard').classList.add('d-none');
+        document.getElementById('loginCard').classList.remove('d-none');
+        
+        // Animate cards
+        const loginCard = document.getElementById('loginCard');
+        loginCard.style.opacity = '0';
+        loginCard.style.transform = 'translateX(-100px)';
+        
+        setTimeout(() => {
+            loginCard.style.transition = 'all 0.3s ease';
+            loginCard.style.opacity = '1';
+            loginCard.style.transform = 'translateX(0)';
+        }, 50);
+    }
+
+    // Add loading state to buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('.auth-form');
+        
+        forms.forEach(form => {
+            form.addEventListener('submit', function() {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.classList.add('loading');
+                submitBtn.innerHTML = '<span class="loading-spinner"></span> Processing...';
+                submitBtn.disabled = true;
+            });
+        });
+
+        // Password confirmation validation
+        const confirmPassword = document.getElementById('confirmPassword');
+        const regPassword = document.getElementById('regPassword');
+        
+        if (confirmPassword && regPassword) {
+            confirmPassword.addEventListener('input', function() {
+                if (this.value !== regPassword.value) {
+                    this.setCustomValidity('Passwords do not match');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+    });
 </script>

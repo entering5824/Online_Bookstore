@@ -34,7 +34,7 @@ namespace Online_Bookstore.Controllers
             var reservationRepository = new ReservationRepository(context);
 
             _bookService = new BookService(bookRepository);
-            _userService = new UserService(context);
+            _userService = new UserService(userRepository);
             _reservationService = new ReservationService(reservationRepository, userRepository, bookRepository);
         }
 
@@ -94,12 +94,12 @@ namespace Online_Bookstore.Controllers
                 int targetUserId = userId;
                 if (currentUser.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (currentUser.UserId <= 0)
+                    if (currentUser.Id <= 0)
                     {
                         TempData["Error"] = "Không thể xác định người dùng!";
                         return RedirectToAction("Index");
                     }
-                    targetUserId = currentUser.UserId;
+                    targetUserId = currentUser.Id;
 
                 }
 

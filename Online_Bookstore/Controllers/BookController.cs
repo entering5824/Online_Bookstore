@@ -25,6 +25,9 @@ public class BookController : Controller
     // Parameterless constructor required by MVC default activator
     public BookController()
     {
+        var context = new ApplicationDbContext();
+        _bookService = new BookService(new BookRepository(context));
+        _bookCategoryRepository = new BookCategoryRepository(context);
     }
 
     [HttpGet, Route("")]
@@ -32,8 +35,8 @@ public class BookController : Controller
     {
         var books = await _bookService.GetAllBooksAsync();
         ViewBag.Books = books;
-        ViewBag.Content = "book/list";
-        return View("layout/main");
+        ViewBag.CurrentUser = Session["CurrentUser"] as User;
+        return View("list");
     }
 
     [HttpGet, Route("add")]
@@ -54,8 +57,7 @@ public class BookController : Controller
 
         ViewBag.Book = new Book();
         ViewBag.Categories = await _bookCategoryRepository.GetAllAsync();
-        ViewBag.Content = "book/add";
-        return View("layout/main");
+        return View("add");
     }
 
     [HttpPost, Route("add")]
@@ -74,8 +76,7 @@ public class BookController : Controller
         {
             ViewBag.Book = book;
             ViewBag.Categories = await _bookCategoryRepository.GetAllAsync();
-            ViewBag.Content = "book/add";
-            return View("layout/main");
+            return View("add");
         }
 
         var category = await _bookCategoryRepository.GetByIdAsync(categoryId);
@@ -84,8 +85,7 @@ public class BookController : Controller
             TempData["error"] = "Không tìm thấy thể loại!";
             ViewBag.Book = book;
             ViewBag.Categories = await _bookCategoryRepository.GetAllAsync();
-            ViewBag.Content = "book/add";
-            return View("layout/main");
+            return View("add");
         }
 
         book.Category = category;
@@ -111,7 +111,7 @@ public class BookController : Controller
         ViewBag.Book = book;
         ViewBag.Categories = await _bookCategoryRepository.GetAllAsync();
         ViewBag.Content = "book/edit";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpPost, Route("edit")]
@@ -131,7 +131,7 @@ public class BookController : Controller
             ViewBag.Book = book;
             ViewBag.Categories = await _bookCategoryRepository.GetAllAsync();
             ViewBag.Content = "book/edit";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         var existingBook = await _bookService.GetBookByIdAsync(book.BookId);
@@ -148,7 +148,7 @@ public class BookController : Controller
             ViewBag.Book = book;
             ViewBag.Categories = await _bookCategoryRepository.GetAllAsync();
             ViewBag.Content = "book/edit";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         book.Category = category;
@@ -198,6 +198,6 @@ public class BookController : Controller
 
         ViewBag.Books = books;
         ViewBag.Content = "book/list";
-        return View("layout/main");
+        return View("Shared/main");
     }
 }}

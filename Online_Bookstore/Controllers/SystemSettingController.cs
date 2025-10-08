@@ -1,5 +1,7 @@
 ﻿using Online_Bookstore.Models;
 using Online_Bookstore.Services.Interfaces;
+using Online_Bookstore.Services;
+using Online_Bookstore.Repository;
 using System;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -18,6 +20,8 @@ namespace Online_Bookstore.Controllers
         // Parameterless constructor required by MVC default activator
         public SystemSettingController()
         {
+            var context = new ApplicationDbContext();
+            _systemSettingService = new SystemSettingService(new SystemSettingRepository(context));
         }
 
         private bool IsAdmin(User user) =>

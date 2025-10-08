@@ -27,7 +27,20 @@ namespace Online_Bookstore.Services
 
         public async Task<List<Reservation>> GetAllReservationsAsync()
         {
-            return await _reservationRepository.GetAllAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔍 ReservationService.GetAllReservationsAsync: Starting...");
+                var result = await _reservationRepository.GetAllAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ ReservationService.GetAllReservationsAsync: Successfully loaded {result.Count} reservations");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Lỗi trong GetAllReservationsAsync: " + ex.Message);
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine("Inner: " + ex.InnerException.Message);
+                throw;
+            }
         }
 
         public async Task<Reservation> GetReservationByIdAsync(int id)
@@ -40,21 +53,15 @@ namespace Online_Bookstore.Services
 
         public async Task SaveReservationAsync(Reservation reservation)
         {
-            if (reservation.UserId.HasValue)
-            {
-                var user = await _userRepository.GetByIdAsync(reservation.UserId.Value);
-                if (user == null)
-                    throw new Exception($"Không tìm thấy người dùng với ID: {reservation.UserId}");
-                reservation.User = user;
-            }
+            var user = await _userRepository.GetByIdAsync(reservation.UserId);
+            if (user == null)
+                throw new Exception($"Không tìm thấy người dùng với ID: {reservation.UserId}");
+            reservation.User = user;
 
-            if (reservation.BookId.HasValue)
-            {
-                var book = await _bookRepository.GetByIdAsync(reservation.BookId.Value);
-                if (book == null)
-                    throw new Exception($"Không tìm thấy sách với ID: {reservation.BookId}");
-                reservation.Book = book;
-            }
+            var book = await _bookRepository.GetByIdAsync(reservation.BookId);
+            if (book == null)
+                throw new Exception($"Không tìm thấy sách với ID: {reservation.BookId}");
+            reservation.Book = book;
 
             await _reservationRepository.SaveAsync(reservation);
         }

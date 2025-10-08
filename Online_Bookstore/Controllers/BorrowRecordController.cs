@@ -2,6 +2,7 @@
 using Online_Bookstore.Models;
 using Online_Bookstore.Services;
 using Online_Bookstore.Utils;
+using Online_Bookstore.Repository;
 using System;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -28,6 +29,14 @@ public class BorrowRecordController : Controller
     // Parameterless constructor required by MVC default activator
     public BorrowRecordController()
     {
+        var context = new ApplicationDbContext();
+        var borrowRecordRepository = new BorrowRecordRepository(context);
+        var userRepository = new UserRepository(context);
+        var bookRepository = new BookRepository(context);
+        
+        _borrowRecordService = new BorrowRecordService(borrowRecordRepository, userRepository, bookRepository);
+        _userService = new UserService(userRepository);
+        _bookService = new BookService(bookRepository);
     }
 
     [HttpGet, Route("")]
@@ -35,7 +44,7 @@ public class BorrowRecordController : Controller
     {
         ViewBag.Records = await _borrowRecordService.GetAllBorrowRecordsAsync();
         ViewBag.Content = "borrowrecord/list.cshtml";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpGet, Route("add")]
@@ -54,7 +63,7 @@ public class BorrowRecordController : Controller
         ViewBag.Users = await _userService.GetAllUsersAsync();
         ViewBag.Books = await _bookService.GetAllBooksAsync();
         ViewBag.Content = "borrowrecord/add.cshtml";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpPost, Route("add")]
@@ -83,7 +92,7 @@ public class BorrowRecordController : Controller
             ViewBag.Users = await _userService.GetAllUsersAsync();
             ViewBag.Books = await _bookService.GetAllBooksAsync();
             ViewBag.Content = "borrowrecord/add.cshtml";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
             try
@@ -91,16 +100,16 @@ public class BorrowRecordController : Controller
                 int targetUserId = userId;
                 if (currentUser.Role.Equals("MEMBER", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (currentUser.UserId <= 0)
+                    if (currentUser.Id <= 0)
                     {
                         TempData["Error"] = "Không thể xác định người dùng!";
                         return RedirectToAction("ListBorrowRecords");
                     }
-                    targetUserId = currentUser.UserId;
+                    targetUserId = currentUser.Id;
 
 
                     DateTime borrowDt = !string.IsNullOrEmpty(borrowDate) ? DateTime.Parse(borrowDate) : DateTime.Now;
-                    DateTime? dueDt = !string.IsNullOrEmpty(dueDate) ? DateTime.Parse(dueDate) : (DateTime?)null;
+                    DateTime dueDt = !string.IsNullOrEmpty(dueDate) ? DateTime.Parse(dueDate) : DateTime.Now.AddDays(14);
 
                     foreach (var bookId in bookIds)
                     {
@@ -124,7 +133,7 @@ public class BorrowRecordController : Controller
                 ViewBag.Users = await _userService.GetAllUsersAsync();
                 ViewBag.Books = await _bookService.GetAllBooksAsync();
                 ViewBag.Content = "borrowrecord/add.cshtml";
-                return View("layout/main");
+                return View("Shared/main");
             }
 
         return RedirectToAction("ListBorrowRecords");
@@ -152,7 +161,7 @@ public class BorrowRecordController : Controller
         ViewBag.Users = await _userService.GetAllUsersAsync();
         ViewBag.Books = await _bookService.GetAllBooksAsync();
         ViewBag.Content = "borrowrecord/edit.cshtml";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpPost, Route("edit")]
@@ -173,7 +182,7 @@ public class BorrowRecordController : Controller
             ViewBag.Users = await _userService.GetAllUsersAsync();
             ViewBag.Books = await _bookService.GetAllBooksAsync();
             ViewBag.Content = "borrowrecord/edit.cshtml";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         try
@@ -188,7 +197,7 @@ public class BorrowRecordController : Controller
             ViewBag.Users = await _userService.GetAllUsersAsync();
             ViewBag.Books = await _bookService.GetAllBooksAsync();
             ViewBag.Content = "borrowrecord/edit.cshtml";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         return RedirectToAction("ListBorrowRecords");

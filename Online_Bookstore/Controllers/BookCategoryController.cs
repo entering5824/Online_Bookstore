@@ -1,6 +1,7 @@
 ﻿using System;
 using Online_Bookstore.Models;
 using Online_Bookstore.Services;
+using Online_Bookstore.Repository;
 using System.Web.Mvc;
 
 namespace Online_Bookstore.Controllers
@@ -17,6 +18,8 @@ public class BookCategoryController : Controller
     // Parameterless constructor required by MVC default activator
     public BookCategoryController()
     {
+        var context = new ApplicationDbContext();
+        _bookCategoryService = new BookCategoryService(new BookCategoryRepository(context));
     }
 
     public ActionResult ListCategories()
@@ -24,7 +27,7 @@ public class BookCategoryController : Controller
         var categories = _bookCategoryService.GetAllCategories();
         ViewBag.Categories = categories;
         ViewBag.Content = "category/list";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpGet]
@@ -45,7 +48,7 @@ public class BookCategoryController : Controller
 
         ViewBag.Category = new BookCategory();
         ViewBag.Content = "category/add";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpPost]
@@ -56,7 +59,7 @@ public class BookCategoryController : Controller
         {
             ViewBag.Category = category;
             ViewBag.Content = "category/add";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         _bookCategoryService.SaveCategory(category);
@@ -79,7 +82,7 @@ public class BookCategoryController : Controller
 
         ViewBag.Category = category;
         ViewBag.Content = "category/edit";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpPost]
@@ -90,7 +93,7 @@ public class BookCategoryController : Controller
         {
             ViewBag.Category = category;
             ViewBag.Content = "category/edit";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         _bookCategoryService.SaveCategory(category);

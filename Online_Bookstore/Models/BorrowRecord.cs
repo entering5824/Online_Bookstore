@@ -5,48 +5,53 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Online_Bookstore.Models
 {
-    [Table("borrow_records")]
-
+    [Table("BorrowRecords")]
     public class BorrowRecord
     {
-            [Key]
-            [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-            [Column("record_id")]
-            public int RecordId { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("Id")]
+        public int Id { get; set; }
 
-            [ForeignKey("User")]
-            [Column("user_id")]
-            public int? UserId { get; set; }
-            public virtual User User { get; set; }
+        [ForeignKey("User")]
+        [Column("UserId")]
+        public int UserId { get; set; }
+        public virtual User User { get; set; }
 
-            [StringLength(20)]
-            [Column("user_code")]
-            public string UserCode { get; set; }
+        [StringLength(20)]
+        [Column("UserCode")]
+        public string UserCode { get; set; }
 
-            [ForeignKey("Book")]
-            [Column("book_id")]
-            public int? BookId { get; set; }
-            public virtual Book Book { get; set; }
+        [ForeignKey("Book")]
+        [Column("BookId")]
+        public int BookId { get; set; }
+        public virtual Book Book { get; set; }
 
-            [StringLength(20)]
-            [Column("book_code")]
-            public string BookCode { get; set; }
+        [StringLength(20)]
+        [Column("BookCode")]
+        public string BookCode { get; set; }
 
-            [Column("borrow_date")]
-            public DateTime? BorrowDate { get; set; }
+        [Column("BorrowDate")]
+        public DateTime BorrowDate { get; set; }
 
-            [Column("due_date")]
-            public DateTime? DueDate { get; set; }
+        [Column("DueDate")]
+        public DateTime DueDate { get; set; }
 
-            [Column("return_date")]
-            public DateTime? ReturnDate { get; set; }
+        [Column("ReturnDate")]
+        public DateTime? ReturnDate { get; set; }
 
-            [StringLength(20)]
-            [Column("status")]
-            public string Status { get; set; }
+        [StringLength(20)]
+        [Column("Status")]
+        public string Status { get; set; }
 
-            [Column("fine_amount")]
-            public double? FineAmount { get; set; }
+        [Column("Notes")]
+        public string Notes { get; set; }
+
+        [Column("CreatedDate")]
+        public DateTime CreatedDate { get; set; }
+
+        [Column("UpdatedDate")]
+        public DateTime UpdatedDate { get; set; }
 
         }
     }

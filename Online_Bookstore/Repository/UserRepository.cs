@@ -1,4 +1,5 @@
 ﻿using Online_Bookstore.Models;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -17,7 +18,20 @@ namespace Online_Bookstore.Repository
 
         public async Task<List<User>> GetAllAsync()
         {
-            return await _context.Users.ToListAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔍 UserRepository.GetAllAsync: Starting...");
+                var result = await _context.Users.ToListAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ UserRepository.GetAllAsync: Successfully loaded {result.Count} users");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Lỗi trong UserRepository.GetAllAsync: " + ex.Message);
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine("Inner: " + ex.InnerException.Message);
+                throw;
+            }
         }
 
         public async Task<User> GetByIdAsync(int id)
@@ -27,7 +41,7 @@ namespace Online_Bookstore.Repository
 
         public async Task SaveAsync(User user)
         {
-            if (user.UserId == 0)
+            if (user.Id == 0)
             {
                 _context.Users.Add(user);
             }
@@ -56,6 +70,25 @@ namespace Online_Bookstore.Repository
         public async Task<User> FindByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<Dictionary<string, long>> GetUsersByRoleAsync()
+        {
+            return await _context.Users
+                .GroupBy(u => u.Role)
+                .Select(g => new { Role = g.Key, Count = g.LongCount() })
+                .ToDictionaryAsync(x => x.Role, x => x.Count);
+        }
+
+        public async Task<Dictionary<string, long>> GetUserRegistrationByMonthAsync()
+        {
+            return await _context.Users
+                .GroupBy(u => new { Year = u.CreatedDate.Year, Month = u.CreatedDate.Month })
+                .Select(g => new {
+                    Month = (g.Key.Month + "/" + g.Key.Year),
+                    Count = g.LongCount()
+                })
+                .ToDictionaryAsync(x => x.Month, x => x.Count);
         }
     }
 }

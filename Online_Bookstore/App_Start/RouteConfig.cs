@@ -13,6 +13,25 @@ namespace Online_Bookstore
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // Custom routes for easier access
+            routes.MapRoute(
+                name: "Books",
+                url: "books",
+                defaults: new { controller = "Book", action = "ListBooks" }
+            );
+
+            routes.MapRoute(
+                name: "Statistics", 
+                url: "statistics",
+                defaults: new { controller = "Statistics", action = "Index" }
+            );
+
+            routes.MapRoute(
+                name: "Test",
+                url: "test",
+                defaults: new { controller = "Test", action = "Index" }
+            );
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

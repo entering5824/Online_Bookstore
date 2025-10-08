@@ -1,0 +1,26 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Test Database";
+}
+
+<div class="container">
+    <h2>Database Connection Test</h2>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Kiểm tra kết nối Database</h4>
+                </div>
+                <div class="card-body">
+                    <a href="@Url.Action("TestDatabase")" class="btn btn-primary">
+                        <i class="fas fa-database me-2"></i>Test Database Connection
+                    </a>
+                    <hr>
+                    <p class="text-muted">
+                        Click vào button trên để kiểm tra kết nối database và dữ liệu.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

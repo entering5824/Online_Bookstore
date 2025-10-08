@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using Online_Bookstore.Models;
 using Online_Bookstore.Services;
 using Online_Bookstore.Services.Interfaces;
+using Online_Bookstore.Repository;
 
 namespace Online_Bookstore.Controllers
 {
@@ -18,6 +19,10 @@ public class DigitalResourceController : Controller
     // Parameterless constructor required by MVC default activator
     public DigitalResourceController()
     {
+        var context = new ApplicationDbContext();
+        var digitalResourceRepository = new DigitalResourceRepository(context);
+        var bookRepository = new BookRepository(context);
+        _digitalResourceService = new DigitalResourceService(digitalResourceRepository, bookRepository);
     }
 
     public async System.Threading.Tasks.Task<ActionResult> Index()
@@ -25,7 +30,7 @@ public class DigitalResourceController : Controller
         var resources = await _digitalResourceService.GetAllDigitalResourcesAsync();
         ViewBag.Resources = resources;
         ViewBag.Content = "digitalresource/list";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpGet]
@@ -46,7 +51,7 @@ public class DigitalResourceController : Controller
 
         ViewBag.Resource = new DigitalResource();
         ViewBag.Content = "digitalresource/add";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpPost]
@@ -65,7 +70,7 @@ public class DigitalResourceController : Controller
         {
             ViewBag.Resource = resource;
             ViewBag.Content = "digitalresource/add";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         try
@@ -78,7 +83,7 @@ public class DigitalResourceController : Controller
             TempData["Error"] = ex.Message;
             ViewBag.Resource = resource;
             ViewBag.Content = "digitalresource/add";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         return RedirectToAction("Index");
@@ -104,7 +109,7 @@ public class DigitalResourceController : Controller
 
         ViewBag.Resource = resource;
         ViewBag.Content = "digitalresource/edit";
-        return View("layout/main");
+        return View("Shared/main");
     }
 
     [HttpPost]
@@ -123,7 +128,7 @@ public class DigitalResourceController : Controller
         {
             ViewBag.Resource = resource;
             ViewBag.Content = "digitalresource/edit";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         try
@@ -136,7 +141,7 @@ public class DigitalResourceController : Controller
             TempData["Error"] = ex.Message;
             ViewBag.Resource = resource;
             ViewBag.Content = "digitalresource/edit";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         return RedirectToAction("Index");

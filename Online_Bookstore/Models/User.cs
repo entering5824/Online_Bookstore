@@ -5,51 +5,60 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Online_Bookstore.Models
 {
-[Table("users")]
+[Table("Users")]
 public class User
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("user_id")]
-    public int UserId { get; set; }
-
-    [StringLength(20)]
-    [Column("user_code")]
-    public string UserCode { get; set; }
-
-    [Required]
-    [StringLength(50)]
-    [Column("username")]
-    public string Username { get; set; }
-
-    [Required]
-    [StringLength(255)]
-    [Column("password_hash")]
-    public string PasswordHash { get; set; }
+    [Column("Id")]
+    public int Id { get; set; }
 
     [Required]
     [StringLength(100)]
-    [Column("full_name")]
+    [Column("FullName")]
     public string FullName { get; set; }
 
     [Required]
     [StringLength(100)]
-    [Column("email")]
+    [Column("Email")]
     public string Email { get; set; }
 
     [Required]
-    [StringLength(10)]
-    [Column("role")]
+    [StringLength(50)]
+    [Column("Username")]
+    public string Username { get; set; }
+
+    [Required]
+    [StringLength(255)]
+    [Column("PasswordHash")]
+    public string PasswordHash { get; set; }
+
+    [Required]
+    [StringLength(20)]
+    [Column("Role")]
     public string Role { get; set; }
 
-    [StringLength(10)]
-    [Column("status")]
-    public string Status { get; set; }
+    [StringLength(20)]
+    [Column("UserCode")]
+    public string UserCode { get; set; }
 
-    [StringLength(10)]
-    [Column("language_preference")]
-    public string LanguagePreference { get; set; }
+    [StringLength(20)]
+    [Column("PhoneNumber")]
+    public string PhoneNumber { get; set; }
 
-    [Column("created_at")]
-    public DateTime? CreatedAt { get; set; }
+    [StringLength(255)]
+    [Column("Address")]
+    public string Address { get; set; }
+
+    [Column("CreatedDate")]
+    public DateTime CreatedDate { get; set; }
+
+    [Column("UpdatedDate")]
+    public DateTime UpdatedDate { get; set; }
+
+    [Column("IsActive")]
+    public bool IsActive { get; set; }
+
+    [Column("LastLoginDate")]
+    public DateTime? LastLoginDate { get; set; }
 }}

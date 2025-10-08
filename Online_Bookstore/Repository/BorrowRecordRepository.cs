@@ -1,4 +1,5 @@
 ﻿using Online_Bookstore.Models;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -17,17 +18,30 @@ namespace Online_Bookstore.Repository
 
         public async Task<List<BorrowRecord>> GetAllAsync()
         {
-            return await _context.BorrowRecords.Include(r => r.User).Include(r => r.Book).ToListAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔍 BorrowRecordRepository.GetAllAsync: Starting...");
+                var result = await _context.BorrowRecords.Include(r => r.User).Include(r => r.Book).ToListAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ BorrowRecordRepository.GetAllAsync: Successfully loaded {result.Count} borrow records");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Lỗi trong BorrowRecordRepository.GetAllAsync: " + ex.Message);
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine("Inner: " + ex.InnerException.Message);
+                throw;
+            }
         }
 
         public async Task<BorrowRecord> GetByIdAsync(int id)
         {
-            return await _context.BorrowRecords.Include(r => r.User).Include(r => r.Book).FirstOrDefaultAsync(r => r.RecordId == id);
+            return await _context.BorrowRecords.Include(r => r.User).Include(r => r.Book).FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task SaveAsync(BorrowRecord record)
         {
-            if (record.RecordId == 0)
+            if (record.Id == 0)
             {
                 _context.BorrowRecords.Add(record);
             }

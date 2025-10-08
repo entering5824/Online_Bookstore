@@ -5,31 +5,36 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Online_Bookstore.Models
 {
-    [Table("activity_logs")]
-
+    [Table("ActivityLogs")]
     public class ActivityLog
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("log_id")]
+        [Column("Id")]
         public int LogId { get; set; }
 
         [ForeignKey("User")]
-        [Column("user_id")]
-        public int? UserId { get; set; }   // khoá ngoại
+        [Column("UserId")]
+        public int? UserId { get; set; }
+        public virtual User User { get; set; }
 
-        public virtual User User { get; set; }  // navigation property
-
-        [StringLength(255)]
-        [Column("action")]
+        [Required]
+        [StringLength(100)]
+        [Column("Action")]
         public string Action { get; set; }
 
-        [Column("log_time")]
-        public DateTime? LogTime { get; set; }
+        [Column("Description")]
+        public string Description { get; set; }
 
         [StringLength(45)]
-        [Column("ip_address")]
+        [Column("IpAddress")]
         public string IpAddress { get; set; }
+
+        [Column("UserAgent")]
+        public string UserAgent { get; set; }
+
+        [Column("CreatedDate")]
+        public DateTime CreatedDate { get; set; }
 
     }
 }

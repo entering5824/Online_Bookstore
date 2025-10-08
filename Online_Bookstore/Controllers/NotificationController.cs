@@ -68,8 +68,7 @@ namespace Online_Bookstore.Controllers
             {
                 if (string.IsNullOrWhiteSpace(notification.Type))
                     notification.Type = "system";
-                if (notification.IsRead == null)
-                    notification.IsRead = false;
+                // IsRead is already initialized to false by default
 
                 await _notificationService.SaveNotificationAsync(notification);
                 TempData["Success"] = "Thêm thông báo thành công!";

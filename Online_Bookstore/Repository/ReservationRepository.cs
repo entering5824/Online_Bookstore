@@ -1,4 +1,5 @@
 ﻿using Online_Bookstore.Models;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -17,17 +18,30 @@ namespace Online_Bookstore.Repository
 
         public async Task<List<Reservation>> GetAllAsync()
         {
-            return await _context.Reservations.Include(r => r.User).Include(r => r.Book).ToListAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔍 ReservationRepository.GetAllAsync: Starting...");
+                var result = await _context.Reservations.Include(r => r.User).Include(r => r.Book).ToListAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ ReservationRepository.GetAllAsync: Successfully loaded {result.Count} reservations");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Lỗi trong ReservationRepository.GetAllAsync: " + ex.Message);
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine("Inner: " + ex.InnerException.Message);
+                throw;
+            }
         }
 
         public async Task<Reservation> GetByIdAsync(int id)
         {
-            return await _context.Reservations.Include(r => r.User).Include(r => r.Book).FirstOrDefaultAsync(r => r.ReservationId == id);
+            return await _context.Reservations.Include(r => r.User).Include(r => r.Book).FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task SaveAsync(Reservation reservation)
         {
-            if (reservation.ReservationId == 0)
+            if (reservation.Id == 0)
             {
                 _context.Reservations.Add(reservation);
             }

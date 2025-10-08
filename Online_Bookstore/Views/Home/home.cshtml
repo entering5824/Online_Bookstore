@@ -1,53 +1,61 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewBag.Title = "Home";
+
     var error = ViewBag.Error;
-    var totalBooks = ViewBag.TotalBooks;
-    var totalUsers = ViewBag.TotalUsers;
-    var totalBorrowRecords = ViewBag.TotalBorrowRecords;
-    var totalReservations = ViewBag.TotalReservations;
+    var totalBooks = ViewBag.TotalBooks ?? 0;
+    var totalUsers = ViewBag.TotalUsers ?? 0;
+    var totalBorrowRecords = ViewBag.TotalBorrowRecords ?? 0;
+    var totalReservations = ViewBag.TotalReservations ?? 0;
     var topBorrowedBooks = ViewBag.TopBorrowedBooks as List<Tuple<string, int>>;
     var topReservedBooks = ViewBag.TopReservedBooks as List<Tuple<string, int>>;
     var currentUser = ViewBag.CurrentUser;
 }
 
 <!-- Hero Section -->
-<section class="bg-light padding-large">
+<section class="hero-section bg-gradient-primary text-white py-5 mb-5">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-4 mb-4">Welcome to Online Bookstore</h1>
-                <p class="lead mb-4">Discover our vast collection of books and digital resources. Your gateway to knowledge and learning.</p>
-                
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-8">
+                <div class="floating-icons position-absolute w-100 h-100">
+                    <i class="fas fa-book floating-icon icon-1"></i>
+                    <i class="fas fa-users floating-icon icon-2"></i>
+                    <i class="fas fa-chart-bar floating-icon icon-3"></i>
+                    <i class="fas fa-star floating-icon icon-4"></i>
+                </div>
+                <h1 class="display-3 fw-bold mb-4">Welcome to Online Bookstore</h1>
+                <p class="lead mb-4">
+                    Discover our vast collection of books and digital resources. Your gateway to knowledge and learning.
+                </p>
+
                 @if (currentUser == null)
                 {
                     <div class="d-flex gap-3">
-                        <a href="@Url.Action("Login", "Login")" class="btn btn-primary btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        <a href="@Url.Action("Login", "Login")" class="btn btn-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Get Started
                         </a>
-                        <a href="@Url.Action("Register", "Login")" class="btn btn-outline-primary btn-lg">
-                            <i class="fas fa-user-plus me-2"></i>Register
+                        <a href="@Url.Action("Register", "Login")" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Join Now
                         </a>
                     </div>
                 }
                 else
                 {
-                    <div class="alert alert-success">
-                        <h4>Welcome back, @currentUser.FullName!</h4>
-                        <p>You are logged in as: <strong>@currentUser.Role</strong></p>
+                    <div class="card bg-white bg-opacity-10 backdrop-blur border-0">
+                        <div class="card-body">
+                            <h4 class="card-title text-white">
+                                <i class="fas fa-user-circle me-2"></i>Welcome back, @currentUser.FullName!
+                            </h4>
+                            <p class="card-text text-white-50 mb-0">
+                                You are logged in as: <span class="badge bg-light text-dark">@currentUser.Role</span>
+                            </p>
+                        </div>
                     </div>
                 }
             </div>
-            <div class="col-lg-6 text-center">
-                <div class="book">
-                    <div class="inner">
-                        <div class="left"></div>
-                        <div class="middle"></div>
-                        <div class="right"></div>
-                    </div>
-                    <ul>
-                        <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
-                    </ul>
+            <div class="col-lg-4 text-center">
+                <div class="auth-icon mx-auto mb-4">
+                    <i class="fas fa-book-open fa-2x"></i>
                 </div>
             </div>
         </div>
@@ -55,50 +63,58 @@
 </section>
 
 <!-- Statistics Section -->
-<section class="padding-medium">
+<section class="py-5">
     <div class="container">
         <div class="row g-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white h-100">
-                    <div class="card-body text-center">
-                        <div class="mb-3">
-                            <i class="fas fa-book fa-3x"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card h-100 text-center">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-book fa-2x text-primary"></i>
+                            </div>
                         </div>
-                        <h5 class="card-title">Total Books</h5>
-                        <h2 class="card-text">@totalBooks</h2>
+                        <h3 class="counter text-primary mb-1" data-target="@totalBooks">0</h3>
+                        <h6 class="text-muted mb-0">Total Books</h6>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white h-100">
-                    <div class="card-body text-center">
-                        <div class="mb-3">
-                            <i class="fas fa-users fa-3x"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card h-100 text-center">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-users fa-2x text-success"></i>
+                            </div>
                         </div>
-                        <h5 class="card-title">Total Users</h5>
-                        <h2 class="card-text">@totalUsers</h2>
+                        <h3 class="counter text-success mb-1" data-target="@totalUsers">0</h3>
+                        <h6 class="text-muted mb-0">Total Users</h6>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-white h-100">
-                    <div class="card-body text-center">
-                        <div class="mb-3">
-                            <i class="fas fa-book-reader fa-3x"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card h-100 text-center">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-exchange-alt fa-2x text-warning"></i>
+                            </div>
                         </div>
-                        <h5 class="card-title">Borrow Records</h5>
-                        <h2 class="card-text">@totalBorrowRecords</h2>
+                        <h3 class="counter text-warning mb-1" data-target="@totalBorrowRecords">0</h3>
+                        <h6 class="text-muted mb-0">Borrow Records</h6>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-info text-white h-100">
-                    <div class="card-body text-center">
-                        <div class="mb-3">
-                            <i class="fas fa-calendar-check fa-3x"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card h-100 text-center">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-calendar-check fa-2x text-info"></i>
+                            </div>
                         </div>
-                        <h5 class="card-title">Reservations</h5>
-                        <h2 class="card-text">@totalReservations</h2>
+                        <h3 class="counter text-info mb-1" data-target="@totalReservations">0</h3>
+                        <h6 class="text-muted mb-0">Reservations</h6>
                     </div>
                 </div>
             </div>
@@ -106,34 +122,34 @@
     </div>
 </section>
 
-<!-- Quick Access Section -->
-<section class="bg-light padding-medium">
+<!-- Quick Actions Section -->
+<section class="py-5 bg-light">
     <div class="container">
         <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
+            <div class="col-lg-6">
+                <div class="card hover-card h-100">
                     <div class="card-body text-center">
-                        <div class="mb-3">
-                            <i class="fas fa-book fa-4x text-primary"></i>
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                            <i class="fas fa-book fa-3x text-primary"></i>
                         </div>
                         <h5 class="card-title">Books</h5>
-                        <p class="card-text">Explore our rich collection of books across various genres and categories.</p>
+                        <p class="card-text">Explore our collection of books across all categories.</p>
                         <a href="@Url.Action("ListBooks", "Book")" class="btn btn-primary">
                             <i class="fas fa-eye me-2"></i>View Books
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
+            <div class="col-lg-6">
+                <div class="card hover-card h-100">
                     <div class="card-body text-center">
-                        <div class="mb-3">
-                            <i class="fas fa-laptop fa-4x text-primary"></i>
+                        <div class="bg-success bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                            <i class="fas fa-laptop fa-3x text-success"></i>
                         </div>
                         <h5 class="card-title">Digital Resources</h5>
-                        <p class="card-text">Access digital resources, e-books, and electronic documents.</p>
-                        <a href="@Url.Action("Index", "DigitalResource")" class="btn btn-primary">
-                            <i class="fas fa-eye me-2"></i>View Resources
+                        <p class="card-text">Access digital e-books and learning materials online.</p>
+                        <a href="@Url.Action("Index", "DigitalResource")" class="btn btn-success">
+                            <i class="fas fa-download me-2"></i>View Resources
                         </a>
                     </div>
                 </div>
@@ -143,36 +159,45 @@
 </section>
 
 <!-- Top Books Section -->
-<section class="padding-medium">
+<section class="py-5">
     <div class="container">
         <div class="row g-4">
-            <div class="col-md-6">
+            <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
+                        <h5 class="card-title mb-0">
                             <i class="fas fa-trophy me-2"></i>Top 10 Most Borrowed Books
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>#</th>
+                                        <th width="60">#</th>
                                         <th>Book Title</th>
-                                        <th>Borrow Count</th>
+                                        <th width="120" class="text-center">Borrow Count</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if (topBorrowedBooks != null)
+                                    @if (topBorrowedBooks != null && topBorrowedBooks.Count > 0)
                                     {
                                         var idx = 1;
                                         foreach (var book in topBorrowedBooks)
                                         {
                                             <tr>
-                                                <td>@idx</td>
-                                                <td>@book.Item1</td>
-                                                <td><span class="badge bg-primary">@book.Item2</span></td>
+                                                <td>
+                                                    <span class="badge bg-primary">@idx</span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-book text-muted me-2"></i>
+                                                        <span class="text-truncate" title="@book.Item1">@book.Item1</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-success">@book.Item2</span>
+                                                </td>
                                             </tr>
                                             idx++;
                                         }
@@ -180,7 +205,9 @@
                                     else
                                     {
                                         <tr>
-                                            <td colspan="3" class="text-center text-muted">No data available</td>
+                                            <td colspan="3" class="text-center text-muted py-4">
+                                                <i class="fas fa-info-circle me-2"></i>No data available
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>
@@ -190,33 +217,42 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-lg-6">
                 <div class="card h-100">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-trophy me-2"></i>Top 10 Most Reserved Books
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>Top 10 Most Reserved Books
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>#</th>
+                                        <th width="60">#</th>
                                         <th>Book Title</th>
-                                        <th>Reservation Count</th>
+                                        <th width="120" class="text-center">Reservation Count</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if (topReservedBooks != null)
+                                    @if (topReservedBooks != null && topReservedBooks.Count > 0)
                                     {
                                         var idx2 = 1;
                                         foreach (var book in topReservedBooks)
                                         {
                                             <tr>
-                                                <td>@idx2</td>
-                                                <td>@book.Item1</td>
-                                                <td><span class="badge bg-success">@book.Item2</span></td>
+                                                <td>
+                                                    <span class="badge bg-warning text-dark">@idx2</span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-book text-muted me-2"></i>
+                                                        <span class="text-truncate" title="@book.Item1">@book.Item1</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-info">@book.Item2</span>
+                                                </td>
                                             </tr>
                                             idx2++;
                                         }
@@ -224,7 +260,9 @@
                                     else
                                     {
                                         <tr>
-                                            <td colspan="3" class="text-center text-muted">No data available</td>
+                                            <td colspan="3" class="text-center text-muted py-4">
+                                                <i class="fas fa-info-circle me-2"></i>No data available
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>

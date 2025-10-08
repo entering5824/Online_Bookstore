@@ -19,6 +19,8 @@ namespace Online_Bookstore.Controllers
         // Parameterless constructor required by MVC default activator
         public ActivityLogController(bool unused = false)
         {
+            var context = new ApplicationDbContext();
+            _activityLogService = new ActivityLogService(new ActivityLogRepository(context));
         }
 
         public async Task<ActionResult> ListActivityLogs()
@@ -26,7 +28,7 @@ namespace Online_Bookstore.Controllers
             var logs = await _activityLogService.GetAllActivityLogsAsync();
             ViewBag.Logs = logs;
             ViewBag.Content = "activitylog/list";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         [HttpGet]
@@ -47,7 +49,7 @@ namespace Online_Bookstore.Controllers
 
             ViewBag.ActivityLog = new ActivityLog();
             ViewBag.Content = "activitylog/add";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         [HttpPost]
@@ -58,7 +60,7 @@ namespace Online_Bookstore.Controllers
             {
                 ViewBag.ActivityLog = log;
                 ViewBag.Content = "activitylog/add";
-                return View("layout/main");
+                return View("Shared/main");
             }
 
             await _activityLogService.SaveActivityLogAsync(log);
@@ -73,7 +75,7 @@ namespace Online_Bookstore.Controllers
 
             ViewBag.ActivityLog = log;
             ViewBag.Content = "activitylog/edit";
-            return View("layout/main");
+            return View("Shared/main");
         }
 
         [HttpPost]
@@ -84,7 +86,7 @@ namespace Online_Bookstore.Controllers
             {
                 ViewBag.ActivityLog = log;
                 ViewBag.Content = "activitylog/edit";
-                return View("layout/main");
+                return View("Shared/main");
             }
 
             await _activityLogService.SaveActivityLogAsync(log);

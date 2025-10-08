@@ -5,21 +5,27 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Online_Bookstore.Models
 {
-    [Table("book_categories")]
+    [Table("BookCategories")]
     public class BookCategory
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("category_id")]
+        [Column("Id")]
         public int CategoryId { get; set; }
 
         [Required]
         [StringLength(100)]
-        [Column("category_name")]
+        [Column("Name")]
         public string CategoryName { get; set; }
 
-        [Column("description", TypeName = "nvarchar(max)")]
+        [Column("Description")]
         public string Description { get; set; }
+
+        [Column("CreatedDate")]
+        public DateTime CreatedDate { get; set; }
+
+        [Column("IsActive")]
+        public bool IsActive { get; set; }
 
         // Navigation property (một Category có nhiều Book)
         public virtual ICollection<Book> Books { get; set; }

@@ -16,90 +16,219 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Preloader -->
-    <div id="preloader">
-        <div class="book">
-            <div class="inner">
-                <div class="left"></div>
-                <div class="middle"></div>
-                <div class="right"></div>
-            </div>
-            <ul>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-            </ul>
-        </div>
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <!-- Toasts will be dynamically added here -->
     </div>
 
-    <!-- Site Header -->
-    <header class="site-header">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="@Url.Action("Index", "Home")">
-                    <h3 class="text-primary">📚 Online Bookstore</h3>
-                </a>
-                
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Home")">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("ListBooks", "Book")">Books</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Statistics")">Statistics</a>
-                        </li>
-                    </ul>
-                    
-                    <ul class="navbar-nav">
-                        @if (Session["CurrentUser"] != null)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    @((Session["CurrentUser"] as Online_Bookstore.Models.User)?.FullName)
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="@Url.Action("Account", "User")">Account</a></li>
-                                    <li><a class="dropdown-item" href="@Url.Action("Logout", "Login")">Logout</a></li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" href="@Url.Action("Login", "Login")">Login</a>
-                            </li>
-                        }
-                    </ul>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid">
+            <!-- Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="@Url.Action("Index", "Home")">
+                <div class="brand-icon me-3">
+                    <i class="fas fa-book-open"></i>
                 </div>
+                <div class="brand-text">
+                    <span class="brand-name">Online Bookstore</span>
+                    <small class="brand-subtitle">Your Digital Library</small>
+                </div>
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navigation Menu -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">
+                            <i class="fas fa-home me-2"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-book me-2"></i>Library
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@Url.Action("ListBooks", "Book")">
+                                <i class="fas fa-list me-2"></i>All Books
+                            </a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("ListBooks", "Book", new { category = "fiction" })">
+                                <i class="fas fa-magic me-2"></i>Fiction
+                            </a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("ListBooks", "Book", new { category = "non-fiction" })">
+                                <i class="fas fa-graduation-cap me-2"></i>Non-Fiction
+                            </a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("ListBooks", "Book", new { category = "textbook" })">
+                                <i class="fas fa-book me-2"></i>Textbooks
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-exchange-alt me-2"></i>Borrowing
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@Url.Action("ListBorrowRecords", "BorrowRecord")">
+                                <i class="fas fa-list me-2"></i>My Borrowed Books
+                            </a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("ListReservations", "Reservation")">
+                                <i class="fas fa-calendar-check me-2"></i>My Reservations
+                            </a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("ListBorrowRecords", "BorrowRecord", new { status = "overdue" })">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Overdue Books
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "DigitalResource")">
+                            <i class="fas fa-laptop me-2"></i>Digital Resources
+                        </a>
+                    </li>
+                    @{
+                        var currentUser = Session["CurrentUser"] as Online_Bookstore.Models.User;
+                    }
+                    @if (currentUser != null && (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-2"></i>Management
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("ListUsers", "User")">
+                                    <i class="fas fa-users me-2"></i>Users
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ListBorrowRecords", "BorrowRecord")">
+                                    <i class="fas fa-list me-2"></i>All Borrow Records
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ListReservations", "Reservation")">
+                                    <i class="fas fa-calendar me-2"></i>All Reservations
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Dashboard", "Statistics")">
+                                    <i class="fas fa-chart-bar me-2"></i>Statistics
+                                </a></li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+
+                <!-- Right Side Items -->
+                <ul class="navbar-nav">
+                    <!-- Search -->
+                    <li class="nav-item me-3">
+                        <div class="search-container">
+                            <input type="text" class="search-input" placeholder="Search books, authors..." id="globalSearch">
+                            <button class="search-btn" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </li>
+
+                    <!-- Quick Actions -->
+                    @if (currentUser != null)
+                    {
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" title="Quick Actions">
+                                <i class="fas fa-plus-circle"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">Quick Actions</h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ListBorrowRecords", "BorrowRecord")">
+                                    <i class="fas fa-book-reader me-2"></i>Borrow a Book
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ListReservations", "Reservation")">
+                                    <i class="fas fa-calendar-plus me-2"></i>Make Reservation
+                                </a></li>
+                                @if (currentUser.Role == "ADMIN" || currentUser.Role == "LIBRARIAN")
+                                {
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("ShowAddForm", "Book")">
+                                        <i class="fas fa-plus me-2"></i>Add New Book
+                                    </a></li>
+                                }
+                            </ul>
+                        </li>
+
+                        <!-- Notifications -->
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" title="Notifications">
+                                <i class="fas fa-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge">
+                                    0
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
+                                <li><h6 class="dropdown-header">Notifications</h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li id="notificationList">
+                                    <div class="text-center text-muted py-3">
+                                        <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                                        <p class="mb-0">No notifications</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- Dark Mode Toggle -->
+                    <li class="nav-item me-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                            <i class="fas fa-moon" id="icon-darkmode"></i>
+                        </button>
+                    </li>
+
+                    <!-- User Menu -->
+                    @if (currentUser != null)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                <div class="user-avatar me-2">
+                                    <i class="fas fa-user-circle fa-lg"></i>
+                                </div>
+                                <div class="d-none d-md-block">
+                                    <div class="fw-bold">@currentUser.FullName</div>
+                                    <small class="text-muted">@currentUser.Role</small>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">@currentUser.FullName</h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Profile", "User")">
+                                    <i class="fas fa-user me-2"></i>My Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ListBorrowRecords", "BorrowRecord")">
+                                    <i class="fas fa-book-reader me-2"></i>My Books
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ListReservations", "Reservation")">
+                                    <i class="fas fa-calendar-check me-2"></i>My Reservations
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="@Url.Action("Logout", "Login")">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="btn btn-primary" href="@Url.Action("Login", "Login")">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        </li>
+                    }
+                </ul>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
     <!-- Main Content -->
-    <main class="container body-content padding-medium">
+    <main class="container-fluid body-content padding-medium">
         @if (TempData["Success"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -127,39 +256,38 @@
         @RenderBody()
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-light padding-medium margin-large">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Online Bookstore</h5>
-                    <p>Your trusted source for books and digital resources.</p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <p>&copy; @DateTime.Now.Year - Online Bookstore. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
     <!-- Scripts -->
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>
     <script>
-        // Hide preloader when page loads
+        // Hide preloader when page loads - Force hide after 3 seconds
         window.addEventListener('load', function() {
-            document.getElementById('preloader').classList.add('hide-preloader');
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                preloader.style.display = 'none';
+            }
         });
+        
+        // Backup: Force hide preloader after 5 seconds regardless
+        setTimeout(function() {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                preloader.style.display = 'none';
+            }
+        }, 5000);
         
         // Dark mode toggle functionality
         function toggleDarkMode() {
             const body = document.body;
+            const icon = document.getElementById('icon-darkmode');
             const currentTheme = body.getAttribute('data-theme');
             
             if (currentTheme === 'dark') {
                 body.removeAttribute('data-theme');
+                if (icon) icon.className = 'fas fa-moon';
                 localStorage.setItem('theme', 'light');
             } else {
                 body.setAttribute('data-theme', 'dark');
+                if (icon) icon.className = 'fas fa-sun';
                 localStorage.setItem('theme', 'dark');
             }
         }
@@ -167,10 +295,220 @@
         // Load saved theme
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme');
+            const icon = document.getElementById('icon-darkmode');
             if (savedTheme === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
+                if (icon) icon.className = 'fas fa-sun';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
             }
+
+            // Counter animation - Temporarily disabled
+            // animateCounters();
         });
+
+        // Counter animation function
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            
+            const animateCounter = (counter) => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const duration = 2000; // 2 seconds
+                const step = target / (duration / 16); // 60fps
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = Math.floor(current);
+                }, 16);
+            };
+
+            // Use Intersection Observer to trigger animation when in view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounter(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+
+            counters.forEach(counter => {
+                observer.observe(counter);
+            });
+        }
+
+        // Global Search Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const globalSearch = document.getElementById('globalSearch');
+            const searchBtn = document.querySelector('.search-btn');
+            
+            if (globalSearch && searchBtn) {
+                function performSearch() {
+                    const query = globalSearch.value.trim();
+                    if (query) {
+                        // Redirect to books page with search query
+                        window.location.href = '@Url.Action("ListBooks", "Book")?search=' + encodeURIComponent(query);
+                    }
+                }
+                
+                searchBtn.addEventListener('click', performSearch);
+                globalSearch.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+
+            // Load notifications
+            loadNotifications();
+            
+            // Enable counter animation
+            animateCounters();
+        });
+
+        // Notification System
+        function loadNotifications() {
+            // Simulate loading notifications
+            const notificationBadge = document.getElementById('notificationBadge');
+            const notificationList = document.getElementById('notificationList');
+            
+            // Mock notifications for demo
+            const mockNotifications = [
+                {
+                    id: 1,
+                    title: 'New Book Added',
+                    message: 'A new book "Advanced C# Programming" has been added to the library.',
+                    type: 'info',
+                    time: '2 hours ago'
+                },
+                {
+                    id: 2,
+                    title: 'Overdue Book',
+                    message: 'You have 1 book overdue. Please return it soon.',
+                    type: 'warning',
+                    time: '1 day ago'
+                }
+            ];
+            
+            if (mockNotifications.length > 0) {
+                notificationBadge.textContent = mockNotifications.length;
+                notificationBadge.style.display = 'block';
+                
+                notificationList.innerHTML = '';
+                mockNotifications.forEach(notification => {
+                    const notificationItem = document.createElement('li');
+                    notificationItem.className = 'notification-item';
+                    notificationItem.innerHTML = `
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <i class="fas fa-${getNotificationIcon(notification.type)} text-${notification.type}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${notification.title}</h6>
+                                <p class="mb-1 small text-muted">${notification.message}</p>
+                                <small class="text-muted">${notification.time}</small>
+                            </div>
+                        </div>
+                    `;
+                    notificationList.appendChild(notificationItem);
+                });
+            } else {
+                notificationBadge.style.display = 'none';
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'check-circle';
+                case 'warning': return 'exclamation-triangle';
+                case 'error': return 'times-circle';
+                default: return 'info-circle';
+            }
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast toast-${type} show`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <div class="toast-icon ${type}">
+                        <i class="fas fa-${getNotificationIcon(type)}"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="toast-title">${getToastTitle(type)}</div>
+                    </div>
+                    <button type="button" class="toast-close" onclick="hideToast('${toastId}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    <div class="toast-message">${message}</div>
+                </div>
+                <div class="toast-progress" style="animation-duration: ${duration}ms;"></div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto hide after duration
+            setTimeout(() => {
+                hideToast(toastId);
+            }, duration);
+        }
+
+        function hideToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.add('hide');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+        }
+
+        function getToastTitle(type) {
+            switch(type) {
+                case 'success': return 'Success';
+                case 'error': return 'Error';
+                case 'warning': return 'Warning';
+                default: return 'Information';
+            }
+        }
+
+        // Check for TempData messages and show toasts
+        @if (TempData["Success"] != null)
+        {
+            <text>
+            showToast('@Html.Raw(TempData["Success"])', 'success');
+            </text>
+        }
+        
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            showToast('@Html.Raw(TempData["Error"])', 'error');
+            </text>
+        }
+        
+        @if (TempData["Warning"] != null)
+        {
+            <text>
+            showToast('@Html.Raw(TempData["Warning"])', 'warning');
+            </text>
+        }
     </script>
 </body>
 </html>

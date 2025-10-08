@@ -1,5 +1,7 @@
 ﻿using Online_Bookstore.Models;
 using Online_Bookstore.Services.Interfaces;
+using Online_Bookstore.Repository;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;  // chú ý namespace của EF6
 using System.Linq;
@@ -9,76 +11,64 @@ namespace Online_Bookstore.Services
 {
     public class UserService : IUserService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly UserRepository _userRepository;
 
-        public UserService(ApplicationDbContext context)
+        public UserService(UserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         public async Task<List<User>> GetAllUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔍 UserService.GetAllUsersAsync: Starting...");
+                var result = await _userRepository.GetAllAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ UserService.GetAllUsersAsync: Successfully loaded {result.Count} users");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Lỗi trong GetAllUsersAsync: " + ex.Message);
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine("Inner: " + ex.InnerException.Message);
+                throw;
+            }
         }
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            return await _context.Users.FindAsync(id);
+            return await _userRepository.GetByIdAsync(id);
         }
 
         public async Task SaveUserAsync(User user)
         {
-            if (user.UserId == 0)
-            {
-                _context.Users.Add(user);
-            }
-            else
-            {
-                _context.Entry(user).State = EntityState.Modified;
-            }
-            await _context.SaveChangesAsync();
+            await _userRepository.SaveAsync(user);
         }
 
         public async Task DeleteUserAsync(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
-            }
+            await _userRepository.DeleteAsync(id);
         }
 
         public async Task<User> FindByUsernameAsync(string username)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == username);
+            return await _userRepository.FindByUsernameAsync(username);
         }
 
         public async Task<User> FindByEmailAsync(string email)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email);
+            return await _userRepository.FindByEmailAsync(email);
         }
 
         public async Task<Dictionary<string, long>> GetUsersByRoleAsync()
         {
-            return await _context.Users
-                .GroupBy(u => u.Role)
-                .Select(g => new { Role = g.Key, Count = g.LongCount() })
-                .ToDictionaryAsync(x => x.Role, x => x.Count);
+            return await _userRepository.GetUsersByRoleAsync();
         }
 
         public async Task<Dictionary<string, long>> GetUserRegistrationByMonthAsync()
         {
-            return await _context.Users
-                .Where(u => u.CreatedAt.HasValue)
-                .GroupBy(u => new { Year = u.CreatedAt.Value.Year, Month = u.CreatedAt.Value.Month })
-                .Select(g => new {
-                    Month = (g.Key.Month + "/" + g.Key.Year),
-                    Count = g.LongCount()
-                })
-                .ToDictionaryAsync(x => x.Month, x => x.Count);
+            return await _userRepository.GetUserRegistrationByMonthAsync();
         }
     }
 }
